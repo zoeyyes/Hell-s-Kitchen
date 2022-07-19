@@ -115,17 +115,17 @@ ui <- dashboardPage(
                        numericInput("vegitable","VEGETABLE",1,min=1),
                        div(style = "color:brown",align='center',
                            'INVENTORY LIMIT: 100'),
-                       div(align='center',actionButton('start','START GAME',style="background-color:#CD853F")))
-                
+                       div(align='center',actionButton('start','START GAME',style="background-color:#CD853F"))),
+                column(9,img(src='Meat.gif',height='450px',width='1050px'))
               ),
               tags$br(),
               fluidRow(
             
                        box(
-                         title = 'Message Box',solidHeader = TRUE,width =3,height = '300px',
+                         title = 'Message Box',solidHeader = TRUE,width =3,height = '320px',
                          htmlOutput('message')),
-                       box(title = 'Recipes',solidHeader = TRUE,width = 5,status = 'primary',height = '300px',),
-                       tabBox(width = 4,height = '300px',
+                       box(title = 'Recipes',solidHeader = TRUE,width = 5,status = 'primary',height = '320px',),
+                       tabBox(width = 4,height = '320px', 
                               tabPanel('Revenue','Revenues'),
                               tabPanel('Demand','Demands'),
                               tabPanel('Inventory','Inventory')))
