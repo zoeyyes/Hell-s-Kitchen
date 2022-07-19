@@ -115,8 +115,11 @@ ui <- dashboardPage(
                        numericInput("vegitable","VEGETABLE",1,min=1),
                        div(style = "color:brown",align='center',
                            'INVENTORY LIMIT: 100'),
-                       div(align='center',actionButton('start','START GAME',style="background-color:#CD853F"))),
-                column(9,img(src='Meat.gif',height='450px',width='1050px'))
+                       div(align='center',actionButton('start','START GAME',width=2,style="background-color:#CD853F",class="btn-lg"))),
+                column(9,
+                       box(height='450px',width='1050px',status = 'primary',
+                           img(src='Meat.gif',height='420px',width='1030px'))
+                       )
               ),
               tags$br(),
               fluidRow(
