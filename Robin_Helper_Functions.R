@@ -56,7 +56,7 @@ generate_random_demand <- function(round_number, demand_df) {
   
 }
 
-# WORKING
+# ERROR: FIX VEGETABLE CONSUMPTION
 # This function updates the amount of remaining ingredients as the week plays on.
 # HOW TO USE: inventory_test_df <- calculate_consumptions(1, inventory_test_df, demand_test_df)
 # This will update your inventory data frame every day in Round 1.
@@ -139,7 +139,9 @@ inventory_test_df <- data.frame(Day = c(seq(0, 13)),
                                 Noodles = c(1000, rep(0, 13)),
                                 Chicken = c(1000, rep(0, 13)),
                                 Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, 14)),
-                                Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, 14)))
+                                Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, 14)),
+                                Revenue = c(rep(0, 14)),
+                                Accumulative_Revenue = c(rep(0, 14)))
 
 # Create a test demand_df
 demand_test_df <- data.frame(Day = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
@@ -162,6 +164,20 @@ inventory_test_df$Vegetables[inventory_test_df$Day == 7] <- inventory_test_df$Ve
 inventory_test_df$Noodles[inventory_test_df$Day == 7] <- inventory_test_df$Noodles[inventory_test_df$Day == 6] + 500
 inventory_test_df$Chicken[inventory_test_df$Day == 7] <- inventory_test_df$Chicken[inventory_test_df$Day == 6] + 1000
 
-# Debugging: Deduct inventory based on dishes' demand in Round 2
+# Debugging: Deduct inventory based on dishes' demand in Round 2 + Update number of each dish sold
 inventory_test_df <- calculate_consumptions(2, inventory_test_df, demand_test_df)
 
+##### Test #####
+
+Revenue <- function (round_number, demand) {
+  for (day in (7*round_number-6):(7*round_number -1)){
+    caifan_A_price <- 5
+    caifan_B_price <- 6.5
+    # demand[demand$Day == day, "Revenue"] = sum(as.data.frame(list(demand=c(Mixed_Vegetable_Rice_Set_A_Sold,Mixed_Vegetable_Rice_Set_B_Sold)))*as.data.frame(list(dish_cost=c(6.5,5))))
+    demand[demand$Day == day, "Revenue"] <- demand[demand$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price + demand[demand$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price
+    demand[demand$Day == day, "Accumulative_Revenue"] <- demand[demand$Day == (day - 1), "Accumulative_Revenue"] + demand[demand$Day == day, "Revenue"]
+  }
+  demand # return
+}
+
+inventory_test_df <- Revenue(1, inventory_test_df)
