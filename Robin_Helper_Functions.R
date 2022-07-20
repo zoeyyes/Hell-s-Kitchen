@@ -56,128 +56,187 @@ generate_random_demand <- function(round_number, demand_df) {
   
 }
 
-# ERROR: FIX VEGETABLE CONSUMPTION
+# WORKING
 # This function updates the amount of remaining ingredients as the week plays on.
-# HOW TO USE: inventory_test_df <- calculate_consumptions(1, inventory_test_df, demand_test_df)
-# This will update your inventory data frame every day in Round 1.
-# I DON'T KNOW A BETTER WAY OF DOING THIS :(, but this function will store the number of dishes sold in inventory_df (to be retrieved later for calculate_revenues())
-calculate_consumptions <- function(round_number, inventory_df, demand_df) {
+# HOW TO USE: stats_test_df <- calculate_consumptions(1, stats_test_df, demand_test_df)
+# This will update your stats data frame every day in Round 1 (for the example above).
+# Would recommend storing the round number as a reactive value.
+calculate_consumption <- function(round_number, stats_df, demand_df) {
   
   for (day in (7 * round_number - 6):(7 * round_number - 1)) {
     
     # Priority 1: Sell Cai Fan Set A
     # Find the max number of Cai Fan Set A that can be sold.
-    max_no_mixed_veg_rice_set_A <- floor(min(inventory_df[inventory_df$Day == (day - 1), "Rice"],
-                                             inventory_df[inventory_df$Day == (day - 1), "Pork"],
-                                             inventory_df[inventory_df$Day == (day - 1), "Vegetables"] / 2,
+    max_no_mixed_veg_rice_set_A <- floor(min(stats_df[stats_df$Day == (day - 1), "Rice"],
+                                             stats_df[stats_df$Day == (day - 1), "Pork"],
+                                             stats_df[stats_df$Day == (day - 1), "Vegetables"] / 2,
                                              demand_df[demand_df$Day == day, 'Mixed_Vegetable_Rice_Set_A'] # If there is an excess of ingredients, max_no == demand for the day
                                              )
                                          )
     
-    # I DON'T KNOW A BETTER WAY OF DOING THIS :(, but I will store the number of dishes sold in inventory (to be retrieved later for calculate_revenues())
-    inventory_df[inventory_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] <- max_no_mixed_veg_rice_set_A
+    # Store the number of dishes sold in stats (to be retrieved later for calculate_revenues())
+    stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] <- max_no_mixed_veg_rice_set_A
     
     # Calculate ingredients consumed based on Cai Fan Set A demand
     rice_consumed <- 1 * max_no_mixed_veg_rice_set_A
-    # Update each day's inventory based on ingredients consumed
-    inventory_df[inventory_df$Day == day, "Rice"] <- inventory_df[inventory_df$Day == (day - 1), "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
+    # Update each day's stats based on ingredients consumed
+    stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == (day - 1), "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
     
     pork_consumed <- 1 * max_no_mixed_veg_rice_set_A
-    inventory_df[inventory_df$Day == day, "Pork"] <- inventory_df[inventory_df$Day == (day - 1), "Pork"] - pork_consumed
+    stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == (day - 1), "Pork"] - pork_consumed
     
     vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_A
-    inventory_df[inventory_df$Day == day, "Vegetables"] <- inventory_df[inventory_df$Day == (day - 1), "Vegetables"] - vegetables_consumed
+    stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == (day - 1), "Vegetables"] - vegetables_consumed
     
     # Priority 2: Sell Cai Fan Set B
     # Find the max number of Cai Fan Set B that can be sold.
-    max_no_mixed_veg_rice_set_B <- floor(min(inventory_df[inventory_df$Day == (day - 1), "Noodles"],
-                                             inventory_df[inventory_df$Day == (day - 1), "Chicken"] / 2,
-                                             inventory_df[inventory_df$Day == day, "Vegetables"], # Based on amount of vegetables left the same day after selling Cai Fan Set A
+    max_no_mixed_veg_rice_set_B <- floor(min(stats_df[stats_df$Day == (day - 1), "Noodles"],
+                                             stats_df[stats_df$Day == (day - 1), "Chicken"] / 2,
+                                             stats_df[stats_df$Day == day, "Vegetables"], # Based on amount of vegetables left the same day after selling Cai Fan Set A
                                              demand_df[demand_df$Day == day, 'Mixed_Vegetable_Rice_Set_B'] # If there is an excess of ingredients, max_no == demand for the day
                                              )
                                          )
     
-    # I DON'T KNOW A BETTER WAY OF DOING THIS :(, but I will store the number of dishes sold in inventory (to be retrieved later for calculate_revenues())
-    inventory_df[inventory_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] <- max_no_mixed_veg_rice_set_B
+    # Store the number of dishes sold in stats (to be retrieved later for calculate_revenues())
+    stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] <- max_no_mixed_veg_rice_set_B
     
     # Calculate ingredients consumed based on Cai Fan Set A demand
     noodles_consumed <- 1 * max_no_mixed_veg_rice_set_B
-    # Update each day's inventory based on ingredients consumed
-    inventory_df[inventory_df$Day == day, "Noodles"] <- inventory_df[inventory_df$Day == (day - 1), "Noodles"] - noodles_consumed # max(0, __) is to stop ingredient level from going below 0.
+    # Update each day's stats based on ingredients consumed
+    stats_df[stats_df$Day == day, "Noodles"] <- stats_df[stats_df$Day == (day - 1), "Noodles"] - noodles_consumed # max(0, __) is to stop ingredient level from going below 0.
     
     chicken_consumed <- 1 * max_no_mixed_veg_rice_set_B
-    inventory_df[inventory_df$Day == day, "Chicken"] <- inventory_df[inventory_df$Day == (day - 1), "Chicken"] - chicken_consumed
+    stats_df[stats_df$Day == day, "Chicken"] <- stats_df[stats_df$Day == (day - 1), "Chicken"] - chicken_consumed
     
     vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_B
-    inventory_df[inventory_df$Day == day, "Vegetables"] <- inventory_df[inventory_df$Day == (day - 1), "Vegetables"] - vegetables_consumed
+    stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == day, "Vegetables"] - vegetables_consumed
+    
+    # At the end of each day, update Total_storage_used column
+    stats_df[stats_df$Day == day, "Total_storage_used"] <- stats_df[stats_df$Day == day, "Rice"] + stats_df[stats_df$Day == day, "Pork"] + stats_df[stats_df$Day == day, "Vegetables"] + stats_df[stats_df$Day == day, "Noodles"] + stats_df[stats_df$Day == day, "Chicken"]
     
   }
   
-  # Return updated inventory_df
-  inventory_df
-  # data.frame(c(inventory_df, demand_df))
+  # Return updated stats_df
+  stats_df
+  # data.frame(c(stats_df, demand_df))
   
 }
 
-# WORK IN PROGRESS
-# This function calculates the revenue generated each day depending on the number of dishes sold.
-# Takes in round_number, inventory_df, demand_df
-# Check maximum number of dishes that can be sold given the inventory levels
-# Calculate revenue
-calculate_revenues <- function(round_number, inventory_df, demand_df) {
-  ###
+# Xin Yi's calculate_revenue()
+# Robin: Can consider merging this function with calculate_consumption().
+calculate_revenue <- function (round_number, stats_df) {
+  for (day in (7*round_number-6):(7*round_number -1)){
+    # Set the price of each dish
+    caifan_A_price <- 5
+    caifan_B_price <- 6.5
+    stats_df[stats_df$Day == day, "Revenue"] <- stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price + stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price
+    stats_df[stats_df$Day == day, "Accumulative_Revenue"] <- stats_df[stats_df$Day == (day - 1), "Accumulative_Revenue"] + stats_df[stats_df$Day == day, "Revenue"]
+    stats_df[stats_df$Day == day, "Cash_on_hand"] <- stats_df[stats_df$Day == (day - 1), "Cash_on_hand"] + stats_df[stats_df$Day == day, "Revenue"]
+  }
+  # Return stats_df
+  stats_df
 }
 
 ###################### DEBUGGING #############################
 
-# Create a test inventory_df
-# Storing the number of dishes sold here for now because I can't find a better place to store it :(
-inventory_test_df <- data.frame(Day = c(seq(0, 13)),
-                                Rice = c(1000, rep(0, 13)),
-                                Pork = c(1000, rep(0, 13)),
-                                Vegetables = c(1000, rep(0, 13)),
-                                Noodles = c(1000, rep(0, 13)),
-                                Chicken = c(1000, rep(0, 13)),
-                                Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, 14)),
-                                Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, 14)),
-                                Revenue = c(rep(0, 14)),
-                                Accumulative_Revenue = c(rep(0, 14)))
+### Use Case: Player orders more than sufficient number of ingredients. ###
+
+# Create a test stats_df (this is based on what we discussed in player_stats_dataframe.xlsx)
+stats_test_df <- data.frame(Day = c(seq(0, 13)),
+                            Rice = c(1000, rep(0, 13)),
+                            Pork = c(1000, rep(0, 13)),
+                            Vegetables = c(1000, rep(0, 13)),
+                            Noodles = c(1000, rep(0, 13)),
+                            Chicken = c(1000, rep(0, 13)),
+                            Total_storage_used = c(5000, rep(0, 13)),
+                            Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, 14)),
+                            Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, 14)),
+                            Revenue = c(rep(0, 14)),
+                            Accumulative_Revenue = c(rep(0, 14)),
+                            Ordering_cost = c(rep(0, 14)),
+                            Cash_on_hand = c(rep(0, 14)))
 
 # Create a test demand_df
-demand_test_df <- data.frame(Day = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
+demand_test_df <- data.frame(Day = c(seq(0, 13)),
                              Mixed_Vegetable_Rice_Set_A = c(rep(0, 14)),
                              Mixed_Vegetable_Rice_Set_B = c(rep(0, 14)))
 
 # Generate demand for Round 1
 demand_test_df <- generate_random_demand(1, demand_test_df)
 
-# Deduct inventory based on dishes' demand in Round 1 + Update number of each dish sold
-inventory_test_df <- calculate_consumptions(1, inventory_test_df, demand_test_df)
+# Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
+stats_test_df <- calculate_consumption(1, stats_test_df, demand_test_df)
+
+# Update revenue columns
+stats_test_df <- calculate_revenue(1, stats_test_df)
+
+# Top up/Restock before Round 2 begins
+stats_test_df$Rice[stats_test_df$Day == 7] <- stats_test_df$Rice[stats_test_df$Day == 6] + 500
+stats_test_df$Pork[stats_test_df$Day == 7] <- stats_test_df$Pork[stats_test_df$Day == 6] + 500
+stats_test_df$Vegetables[stats_test_df$Day == 7] <- stats_test_df$Vegetables[stats_test_df$Day == 6] + 1500
+stats_test_df$Noodles[stats_test_df$Day == 7] <- stats_test_df$Noodles[stats_test_df$Day == 6] + 500
+stats_test_df$Chicken[stats_test_df$Day == 7] <- stats_test_df$Chicken[stats_test_df$Day == 6] + 1000
+stats_test_df$Total_storage_used[stats_test_df$Day == 7] <- stats_test_df$Rice[stats_test_df$Day == 7] + stats_test_df$Pork[stats_test_df$Day == 7] + stats_test_df$Vegetables[stats_test_df$Day == 7] + stats_test_df$Noodles[stats_test_df$Day == 7] + stats_test_df$Chicken[stats_test_df$Day == 7]
+stats_test_df$Accumulative_Revenue[stats_test_df$Day == 7] <- stats_test_df$Accumulative_Revenue[stats_test_df$Day == 6]
+stats_test_df$Ordering_cost[stats_test_df$Day == 7] <- 1000
+stats_test_df$Cash_on_hand[stats_test_df$Day == 7] <- stats_test_df$Cash_on_hand[stats_test_df$Day == 6] - stats_test_df$Ordering_cost[stats_test_df$Day == 7]
 
 # Generate demand for Round 2
 demand_test_df <- generate_random_demand(2, demand_test_df)
 
+# Deduct inventory stats based on dishes' demand in Round 2 + Update number of each dish sold
+stats_test_df <- calculate_consumption(2, stats_test_df, demand_test_df)
+
+# Update revenue columns
+stats_test_df <- calculate_revenue(2, stats_test_df)
+
+### Use Case: Player orders an insufficient amount of ingredients. ###
+
+# Create a test stats_df (this is based on what we discussed in player_stats_dataframe.xlsx)
+stats_test_df <- data.frame(Day = c(seq(0, 13)),
+                            Rice = c(30, rep(0, 13)),
+                            Pork = c(35, rep(0, 13)),
+                            Vegetables = c(70, rep(0, 13)),
+                            Noodles = c(28, rep(0, 13)),
+                            Chicken = c(56, rep(0, 13)),
+                            Total_storage_used = c(30 + 35 + 70 + 28 + 56, rep(0, 13)),
+                            Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, 14)),
+                            Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, 14)),
+                            Revenue = c(rep(0, 14)),
+                            Accumulative_Revenue = c(rep(0, 14)),
+                            Ordering_cost = c(rep(0, 14)),
+                            Cash_on_hand = c(rep(0, 14)))
+
+# Create a test demand_df
+demand_test_df <- data.frame(Day = c(seq(0, 13)),
+                             Mixed_Vegetable_Rice_Set_A = c(rep(0, 14)),
+                             Mixed_Vegetable_Rice_Set_B = c(rep(0, 14)))
+
+# Generate demand for Round 1
+demand_test_df <- generate_random_demand(1, demand_test_df)
+
+# Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
+stats_test_df <- calculate_consumption(1, stats_test_df, demand_test_df)
+
+# Update revenue columns
+stats_test_df <- calculate_revenue(1, stats_test_df)
+
 # Top up/Restock before Round 2 begins
-inventory_test_df$Rice[inventory_test_df$Day == 7] <- inventory_test_df$Rice[inventory_test_df$Day == 6] + 500
-inventory_test_df$Pork[inventory_test_df$Day == 7] <- inventory_test_df$Pork[inventory_test_df$Day == 6] + 500
-inventory_test_df$Vegetables[inventory_test_df$Day == 7] <- inventory_test_df$Vegetables[inventory_test_df$Day == 6] + 1500
-inventory_test_df$Noodles[inventory_test_df$Day == 7] <- inventory_test_df$Noodles[inventory_test_df$Day == 6] + 500
-inventory_test_df$Chicken[inventory_test_df$Day == 7] <- inventory_test_df$Chicken[inventory_test_df$Day == 6] + 1000
+stats_test_df$Rice[stats_test_df$Day == 7] <- stats_test_df$Rice[stats_test_df$Day == 6] + 500
+stats_test_df$Pork[stats_test_df$Day == 7] <- stats_test_df$Pork[stats_test_df$Day == 6] + 500
+stats_test_df$Vegetables[stats_test_df$Day == 7] <- stats_test_df$Vegetables[stats_test_df$Day == 6] + 1500
+stats_test_df$Noodles[stats_test_df$Day == 7] <- stats_test_df$Noodles[stats_test_df$Day == 6] + 500
+stats_test_df$Chicken[stats_test_df$Day == 7] <- stats_test_df$Chicken[stats_test_df$Day == 6] + 1000
+stats_test_df$Total_storage_used[stats_test_df$Day == 7] <- stats_test_df$Rice[stats_test_df$Day == 7] + stats_test_df$Pork[stats_test_df$Day == 7] + stats_test_df$Vegetables[stats_test_df$Day == 7] + stats_test_df$Noodles[stats_test_df$Day == 7] + stats_test_df$Chicken[stats_test_df$Day == 7]
+stats_test_df$Accumulative_Revenue[stats_test_df$Day == 7] <- stats_test_df$Accumulative_Revenue[stats_test_df$Day == 6]
+stats_test_df$Ordering_cost[stats_test_df$Day == 7] <- 1000
+stats_test_df$Cash_on_hand[stats_test_df$Day == 7] <- stats_test_df$Cash_on_hand[stats_test_df$Day == 6] - stats_test_df$Ordering_cost[stats_test_df$Day == 7]
 
-# Debugging: Deduct inventory based on dishes' demand in Round 2 + Update number of each dish sold
-inventory_test_df <- calculate_consumptions(2, inventory_test_df, demand_test_df)
+# Generate demand for Round 2
+demand_test_df <- generate_random_demand(2, demand_test_df)
 
-##### Test #####
+# Deduct inventory stats based on dishes' demand in Round 2 + Update number of each dish sold
+stats_test_df <- calculate_consumption(2, stats_test_df, demand_test_df)
 
-Revenue <- function (round_number, demand) {
-  for (day in (7*round_number-6):(7*round_number -1)){
-    caifan_A_price <- 5
-    caifan_B_price <- 6.5
-    # demand[demand$Day == day, "Revenue"] = sum(as.data.frame(list(demand=c(Mixed_Vegetable_Rice_Set_A_Sold,Mixed_Vegetable_Rice_Set_B_Sold)))*as.data.frame(list(dish_cost=c(6.5,5))))
-    demand[demand$Day == day, "Revenue"] <- demand[demand$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price + demand[demand$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price
-    demand[demand$Day == day, "Accumulative_Revenue"] <- demand[demand$Day == (day - 1), "Accumulative_Revenue"] + demand[demand$Day == day, "Revenue"]
-  }
-  demand # return
-}
-
-inventory_test_df <- Revenue(1, inventory_test_df)
+# Update revenue columns
+stats_test_df <- calculate_revenue(2, stats_test_df)
