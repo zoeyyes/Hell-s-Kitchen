@@ -1,7 +1,7 @@
 library(ggplot2)
 library(shiny)
 library(shinyjs)
-
+library(shinydashboard)
 
 
 ui <- dashboardPage(
@@ -108,14 +108,14 @@ ui <- dashboardPage(
       tabItem(tabName = "game",
               fluidRow(
                 column(3,tags$div(id="inputsection"),
-                       numericInput("redmeat","RED MEAT",1,min=1),
-                       numericInput("whitemeat","WHITE MEAT",1,min=1),
+                       numericInput("pork","PORK",1,min=1),
+                       numericInput("chicken","CHICKEN",1,min=1),
                        numericInput("rice","RICE",1,min=1),
-                       numericInput("noodle","NOODLE",1,min=1),
-                       numericInput("vegitable","VEGETABLE",1,min=1),
-                       div(style = "color:brown",align='center',
+                       numericInput("noodles","NOODLES",1,min=1),
+                       numericInput("vegitables","VEGETABLESset",1,min=1),
+                       div(style = "color:brown, font-size=500%",align='center', 
                            'INVENTORY LIMIT: 100'),
-                       div(align='center',actionButton('start','START GAME',width=2,style="background-color:#CD853F",class="btn-lg"))),
+                       div(align='center',actionButton('start','START GAME',style="background-color:#CD853F",class="btn-lg"))),
                 column(9,
                        box(height='450px',width='1050px',status = 'primary',
                            img(src='Meat.gif',height='420px',width='1030px'))
@@ -127,7 +127,13 @@ ui <- dashboardPage(
                        box(
                          title = 'Message Box',solidHeader = TRUE,width =3,height = '320px',
                          htmlOutput('message')),
-                       box(title = 'Recipes',solidHeader = TRUE,width = 5,status = 'primary',height = '320px',),
+                       box(title = 'Recipes',solidHeader = TRUE,width = 5,status = 'primary',height = '320px',
+                           imageOutput("recipe1",height="100px",width="100px",inline=TRUE),
+                           imageOutput("recipe2",height="100px",width="100px",inline=TRUE),
+                           imageOutput("recipe3",height="100px",width="100px",inline=TRUE),
+                           tags$br(),
+                           imageOutput("recipe4",height="80px",width="120px",inline=TRUE),
+                           imageOutput("recipe5",height="80px",width="120px",inline=TRUE)),
                        tabBox(width = 4,height = '320px', 
                               tabPanel('Revenue','Revenues'),
                               tabPanel('Demand','Demands'),
