@@ -240,3 +240,7 @@ stats_test_df <- calculate_consumption(2, stats_test_df, demand_test_df)
 
 # Update revenue columns
 stats_test_df <- calculate_revenue(2, stats_test_df)
+
+###################### DEBUGGING ENDS #############################
+
+##### END-OF-GAME HELPER FUNCTIONS #####
