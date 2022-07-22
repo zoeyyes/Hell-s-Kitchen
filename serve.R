@@ -2,7 +2,8 @@ library(ggplot2)
 library(shiny)
 library(shinyjs)
 library(shinydashboard)
-
+library(Matrix)
+library(broom.mixed)
 passwordModal <- function(failed = FALSE) {
   modalDialog(
     title = "Create a new password",
@@ -358,6 +359,7 @@ ui <- dashboardPage(
                            img(src='Meat.gif',height='420px',width='1030px'))
                 )
               ),
+              uiOutput("moreControls"),
               tags$br(),
               fluidRow(
                 
@@ -388,8 +390,10 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL)
+  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=NULL)
   #Fire some code if the user clicks the Register button
+  stats=NULL
+  demand=NULL
   observeEvent(input$register, {
     showModal(passwordModal(failed=FALSE))
   })
@@ -398,6 +402,7 @@ server <- function(input, output, session) {
   })
   observeEvent(input$start, {
     # Create the state_df
+    vals$round=1
     stats <- data.frame(Day = c(seq(0, 13)),
                            Rice = c(input$rice, rep(0, 13)),
                            Pork = c(input$pork, rep(0, 13)),
@@ -429,12 +434,12 @@ server <- function(input, output, session) {
     View(stats)
     
     output$Revenueplot <- renderPlot({
-      ggplot(stats,mapping=aes(x=Day,y=Accumulative_Revenue))+
+      ggplot(stats[1:7,],mapping=aes(x=Day,y=Accumulative_Revenue))+
         geom_line()+
         geom_text(aes(label=Accumulative_Revenue))
     })
     output$Inventoryplot <- renderPlot({
-      ggplot(stats)+
+      ggplot(stats[1:7,])+
         geom_line(aes(x=Day,y=Pork,color="red"))+
         geom_line(aes(x=Day,y=Rice,color="blue"))+
         geom_line(aes(x=Day,y=Vegetables,color="green"))+
@@ -442,11 +447,30 @@ server <- function(input, output, session) {
         geom_line(aes(x=Day,y=Chicken,color="black"))
     })
     output$Demandplot <- renderPlot({
-      ggplot(demand,mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
+      ggplot(demand[1:7,],mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
         geom_line()+
         geom_text(aes(label=Mixed_Vegetable_Rice_Set_A))
     })
+    ###
+    output$moreControls <- renderUI({
+      actionButton("secondround","Start the Second Round",style="background-color:#CD853F",class="btn-lg")
+    })
   })
+  
+  #seconde round
+  observeEvent(input$secondround, {
+    stats$Rice[stats$Day == 7] <- stats$Rice[stats$Day == 6] + input$rice
+    stats$Pork[stats$Day == 7] <- stats$Pork[stats$Day == 6] + input$pork
+    stats$Vegetables[stats$Day == 7] <- stats$Vegetables[stats$Day == 6] + input$vegetables
+    stats$Noodles[stats$Day == 7] <- stats$Noodles[stats$Day == 6] + input$noodles
+    stats$Chicken[stats$Day == 7] <- stats$Chicken[stats$Day == 6] + input$chicken
+    stats$Total_storage_used[stats$Day == 7] <- stats$Rice[stats$Day == 7] + stats$Pork[stats$Day == 7] + stats$Vegetables[stats$Day == 7] + stats$Noodles[stats$Day == 7] + stats$Chicken[stats$Day == 7]
+    stats$Accumulative_Revenue[stats$Day == 7] <- stats$Accumulative_Revenue[stats$Day == 6]
+    stats$Ordering_cost[stats$Day == 7] <- 1000
+    stats$Cash_on_hand[stats$Day == 7] <- stats$Cash_on_hand[stats$Day == 6] - stats$Ordering_cost[stats$Day == 7]
+    View(stats)
+  })
+  
   
   # to be editted
   output$leaderboard <- renderTable({numclicks <- input$publishscore +input$start #to force a refresh whenever one of these buttons is clicked
