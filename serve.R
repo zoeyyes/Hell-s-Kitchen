@@ -372,10 +372,9 @@ ui <- dashboardPage(
                     imageOutput("recipe4",height="80px",width="120px",inline=TRUE),
                     imageOutput("recipe5",height="80px",width="120px",inline=TRUE)),
                 tabBox(width = 4,height = '320px', 
-                       tabPanel('Revenue','Revenues'),
-                       tabPanel('Demand','Demands'),
-                       tabPanel('Inventory','Inventory')))
-              
+                       tabPanel('Revenue',plotOutput("Revenueplot")),
+                       tabPanel('Demand',plotOutput("Demandplot")),
+                       tabPanel('Inventory',plotOutput("Inventoryplot"))))
       ),
       
       tabItem(tabName = 'scores',
@@ -389,7 +388,7 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,gamevariantid=1)
+  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL)
   #Fire some code if the user clicks the Register button
   observeEvent(input$register, {
     showModal(passwordModal(failed=FALSE))
@@ -399,7 +398,7 @@ server <- function(input, output, session) {
   })
   observeEvent(input$start, {
     # Create the state_df
-    stats_df <- data.frame(Day = c(seq(0, 13)),
+    stats <- data.frame(Day = c(seq(0, 13)),
                            Rice = c(input$rice, rep(0, 13)),
                            Pork = c(input$pork, rep(0, 13)),
                            Vegetables = c(input$vegetables, rep(0, 13)),
@@ -412,21 +411,44 @@ server <- function(input, output, session) {
                            Accumulative_Revenue = c(rep(0, 14)),
                            Ordering_cost = c(rep(0, 14)),
                            Cash_on_hand = c(rep(0, 14)))
-    View(stats_df)
+    
     # Create the demand_df
-    demand_df <- data.frame(Day = c(seq(0, 13)),
+    demand <- data.frame(Day = c(seq(0, 13)),
                             Mixed_Vegetable_Rice_Set_A = c(rep(0, 14)),
                             Mixed_Vegetable_Rice_Set_B = c(rep(0, 14)))
     
     # Generate demand for Round 1
-    demand_df <- generate_random_demand(1, demand_df)
-    View(demand_df)
+    demand <- generate_random_demand(1, demand)
+    View(demand)
+    
     # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
-    stats_df <- calculate_consumption(1, stats_df, demand_df)
+    stats <- calculate_consumption(1, stats, demand)
     
     # Update revenue columns
-    stats_df <- calculate_revenue(1, stats_df)
+    stats <- calculate_revenue(1, stats)
+    View(stats)
+    
+    output$Revenueplot <- renderPlot({
+      ggplot(stats,mapping=aes(x=Day,y=Accumulative_Revenue))+
+        geom_line()+
+        geom_text(aes(label=Accumulative_Revenue))
+    })
+    output$Inventoryplot <- renderPlot({
+      ggplot(stats)+
+        geom_line(aes(x=Day,y=Pork,color="red"))+
+        geom_line(aes(x=Day,y=Rice,color="blue"))+
+        geom_line(aes(x=Day,y=Vegetables,color="green"))+
+        geom_line(aes(x=Day,y=Noodles,color="yello"))+
+        geom_line(aes(x=Day,y=Chicken,color="black"))
+    })
+    output$Demandplot <- renderPlot({
+      ggplot(demand,mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
+        geom_line()+
+        geom_text(aes(label=Mixed_Vegetable_Rice_Set_A))
+    })
   })
+  
+  # to be editted
   output$leaderboard <- renderTable({numclicks <- input$publishscore +input$start #to force a refresh whenever one of these buttons is clicked
   leaderboard <- getLeaderBoard(vals$gamevariantid)
   leaderboard}
