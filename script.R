@@ -4,7 +4,6 @@ library(shiny)
 library(shinyjs)
 library(shinydashboard)
 
-
 ui <- dashboardPage(
   dashboardHeader(title = "Hell's Kitchen"),
   dashboardSidebar(
@@ -157,13 +156,13 @@ server <- function(input, output, session) {
   MAXROUND<-5
   Initial_cash_on_hand<-20000
   
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stat=NULL,demand=NULL,orderplan=NULL)
+  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=NULL,demand=NULL,orderplan=NULL)
   #Fire some code if the user clicks the Register button
   
-  vals$orderplan<-data.frame(matrix(ncol = 5, nrow = 0))
-  colnames(vals$orderplan)<-c('chicken', 'pork', 'noodle', 'rice', 'vegetable')
+  orderplan<-data.frame(matrix(ncol = 5, nrow = 0))
+  colnames(orderplan)<-c('chicken', 'pork', 'noodle', 'rice', 'vegetable')
   
-  vals$stats <- data.frame(Day = c(seq(0, MAXROUND*7)),
+  stats <- data.frame(Day = c(seq(0, MAXROUND*7)),
                       Rice = c(rep(0, MAXROUND*7+1)),
                       Pork = c(rep(0, MAXROUND*7+1)),
                       Vegetables = c(rep(0, MAXROUND*7+1)),
@@ -178,7 +177,7 @@ server <- function(input, output, session) {
                       Cash_on_hand = c(rep(0, MAXROUND*7+1)))
   
   # Create the demand_df
-  vals$demand <- data.frame(Day = c(seq(0, MAXROUND*7-1)),
+  demand <- data.frame(Day = c(seq(0, MAXROUND*7-1)),
                        Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
                        Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
   
@@ -410,24 +409,24 @@ server <- function(input, output, session) {
 
     
     # Generate demand for Round 1
-    vals$demand <- generate_random_demand(vals$round, demand)
-    View(vals$demand)
+    demand <- generate_random_demand(vals$round, demand)
+    View(demand)
     
     # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
-    vals$stats <- calculate_consumption(vals$round, stats, demand)
+    stats <- calculate_consumption(vals$round, stats, demand)
     
     # Update revenue columns
-    vals$stats <- calculate_revenue(vals$round, stats)
-    View(vals$stats)
+    stats <- calculate_revenue(vals$round, stats)
+    View(stats)
     print(paste0('now is round',vals$round))
     
     output$Revenueplot <- renderPlot({
-      ggplot(vals$stats[1:vals$round*7,],mapping=aes(x=Day,y=Accumulative_Revenue))+
+      ggplot(stats[1:vals$round*7,],mapping=aes(x=Day,y=Accumulative_Revenue))+
         geom_line()+
         geom_text(aes(label=Accumulative_Revenue))
     })
     output$Inventoryplot <- renderPlot({
-      ggplot(vals$stats[1:vals$round*7,])+
+      ggplot(stats[1:vals$round*7,])+
         geom_line(aes(x=Day,y=Pork,color="red"))+
         geom_line(aes(x=Day,y=Rice,color="blue"))+
         geom_line(aes(x=Day,y=Vegetables,color="green"))+
