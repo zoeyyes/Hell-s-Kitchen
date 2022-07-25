@@ -266,8 +266,7 @@ calculate_orderingcost<-function(round,orderplan,stats){
 #seq: chicken pork noodle rice vegetable
     unit_price<-c(5,5,2,2,4)
     ordercost<-sum(unit_price*orderplan[round,])
-    stats[stats$Day==round*7-7,"Ordering_cost"]<-ordercost
-  
+    stats[stats$Day==round*7-6,"Ordering_cost"]<-ordercost
   stats
 }
 
@@ -280,11 +279,11 @@ update_storage_used<-function(round,orderplan,stats){
     stats[stats$Day==0,'Rice']<-orderplan[round,'rice']
   }else{
     purchase_day<-round*7-6
-    stats[stats$Day==purchase_day,'Chicken']<-stats[stats$Day==(purchase_day-1),'Chicken']+orderplan[round,'chicken']
-    stats[stats$Day==purchase_day,'Pork']<-stats[stats$Day==(purchase_day-1),'Pork']+orderplan[round,'pork']
-    stats[stats$Day==purchase_day,'Noodles']<-stats[stats$Day==(purchase_day-1),'Noodles']+orderplan[round,'noodle']
-    stats[stats$Day==purchase_day,'Vegetables']<-stats[stats$Day==(purchase_day-1),'Vegetables']+orderplan[round,'vegetable']
-    stats[stats$Day==purchase_day,'Rice']<-stats[stats$Day==(purchase_day-1),'Rice']+orderplan[round,'rice']
+    stats[stats$Day==(purchase_day-1),'Chicken']<-stats[stats$Day==(purchase_day-1),'Chicken']+orderplan[round,'chicken']
+    stats[stats$Day==(purchase_day-1),'Pork']<-stats[stats$Day==(purchase_day-1),'Pork']+orderplan[round,'pork']
+    stats[stats$Day==(purchase_day-1),'Noodles']<-stats[stats$Day==(purchase_day-1),'Noodles']+orderplan[round,'noodle']
+    stats[stats$Day==(purchase_day-1),'Vegetables']<-stats[stats$Day==(purchase_day-1),'Vegetables']+orderplan[round,'vegetable']
+    stats[stats$Day==(purchase_day-1),'Rice']<-stats[stats$Day==(purchase_day-1),'Rice']+orderplan[round,'rice']
   }
   stats
   
@@ -379,8 +378,8 @@ calculate_revenue <- function (round_number, stats_df) {
 
 calculate_cash_on_hand<-function(round,stats_df){
   
-    for (day in (7*round-7):(7*round)){
-      stats_df[stats_df$Day == day, "Cash_on_hand"] <- as.numeric(stats_df[stats_df$Day == 0, "Cash_on_hand"]) + as.numeric(stats_df[stats_df$Day == day, "Accumulative_Revenue"])- as.numeric(stats_df[stats_df$Day == day, "Ordering_cost"])
+    for (day in (7*round-6):(7*round)){
+      stats_df[stats_df$Day == day, "Cash_on_hand"] <-stats_df[stats_df$Day == (day-1),'Cash_on_hand']+stats_df[stats_df$Day == day,'Revenue']-stats_df[stats_df$Day == day,'Ordering_cost']
     }
    stats_df
 }
@@ -427,53 +426,31 @@ stats_test_df<-update_storage_used(round,orderplan,stats_test_df)
 # Generate demand for Round 1
 demand_test_df <- generate_random_demand(round, demand_test_df)
 
-stats_test_df <- calculate_orderingcost(1,orderplan,stats_test_df)
+stats_test_df <- calculate_orderingcost(round,orderplan,stats_test_df)
 
-stats_test_df <- update_storage_used(1,orderplan,stats_test_df) 
 
 # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
 stats_test_df <- calculate_consumption(round, stats_test_df, demand_test_df)
 
 # Update revenue columns
-stats_test_df <- calculate_revenue(1, stats_test_df)
+stats_test_df <- calculate_revenue(round, stats_test_df)
 # Update cash_on_hand
-stats_test_df <- calculate_cash_on_hand(1,stats_test_df)
-
-View(stats_test_df)
-View(demand_test_df)
-#----------------------------testing start (round2)-------------------------------------------
-
-
-
+stats_test_df <- calculate_cash_on_hand(round,stats_test_df)
 
 
 #----------------------------testing start (round2)-------------------------------------------
-# Top up/Restock before Round 2 begins
-stats_test_df$Rice[stats_test_df$Day == 7] <- stats_test_df$Rice[stats_test_df$Day == 6] + 500
-stats_test_df$Pork[stats_test_df$Day == 7] <- stats_test_df$Pork[stats_test_df$Day == 6] + 500
-stats_test_df$Vegetables[stats_test_df$Day == 7] <- stats_test_df$Vegetables[stats_test_df$Day == 6] + 1500
-stats_test_df$Noodles[stats_test_df$Day == 7] <- stats_test_df$Noodles[stats_test_df$Day == 6] + 500
-stats_test_df$Chicken[stats_test_df$Day == 7] <- stats_test_df$Chicken[stats_test_df$Day == 6] + 1000
-stats_test_df$Total_storage_used[stats_test_df$Day == 7] <- stats_test_df$Rice[stats_test_df$Day == 7] + stats_test_df$Pork[stats_test_df$Day == 7] + stats_test_df$Vegetables[stats_test_df$Day == 7] + stats_test_df$Noodles[stats_test_df$Day == 7] + stats_test_df$Chicken[stats_test_df$Day == 7]
-stats_test_df$Accumulative_Revenue[stats_test_df$Day == 7] <- stats_test_df$Accumulative_Revenue[stats_test_df$Day == 6]
-stats_test_df$Ordering_cost[stats_test_df$Day == 7] <- 1000+calculate_orderingcost(2,orderplan,stats_test_df)
-stats_test_df$Cash_on_hand[stats_test_df$Day == 7] <- stats_test_df$Cash_on_hand[stats_test_df$Day == 6] - stats_test_df$Ordering_cost[stats_test_df$Day == 7]
-# Generate demand for Round 2
-demand_test_df <- generate_random_demand(2, demand_test_df)
+round<-round+1
+orderplan<-form_orderplan_df(orderplan,500,500,500,200,500)
 
+stats_test_df<-update_storage_used(round,orderplan,stats_test_df)
 
-orderplan<-form_orderplan_df(orderplan,500,500,1500,500,1000)
+demand_test_df <- generate_random_demand(round, demand_test_df)
 
-stats_test_df <- calculate_orderingcost(2,orderplan,stats_test_df)
-stats_test_df <- update_storage_used(2,orderplan,stats_test_df) 
-# Deduct inventory stats based on dishes' demand in Round 2 + Update number of each dish sold
-stats_test_df <- calculate_consumption(2, stats_test_df, demand_test_df)
+stats_test_df <- calculate_orderingcost(round,orderplan,stats_test_df)
 
-# Update revenue columns
-stats_test_df <- calculate_revenue(2, stats_test_df)
+stats_test_df <- calculate_consumption(round, stats_test_df, demand_test_df)
 
-# Update cash_on_hand
-stats_test_df <- calculate_cash_on_hand(2,stats_test_df)
+stats_test_df <- calculate_revenue(round, stats_test_df)
 
-
+stats_test_df <- calculate_cash_on_hand(round,stats_test_df)
 

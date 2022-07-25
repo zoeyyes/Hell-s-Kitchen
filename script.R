@@ -153,34 +153,38 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
   
+  
+#------------------------initialize---------------------------------------------------------
+  
   MAXROUND<-5
   Initial_cash_on_hand<-20000
   
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=NULL,demand=NULL,orderplan=NULL)
-  #Fire some code if the user clicks the Register button
+  initial_orderplan<-data.frame(matrix(ncol = 5, nrow = 0))
+  colnames(vals$orderplan)<-c('chicken', 'pork', 'noodles', 'rice', 'vegetables')
   
-  orderplan<-data.frame(matrix(ncol = 5, nrow = 0))
-  colnames(orderplan)<-c('chicken', 'pork', 'noodle', 'rice', 'vegetable')
-  
-  stats <- data.frame(Day = c(seq(0, MAXROUND*7)),
-                      Rice = c(rep(0, MAXROUND*7+1)),
-                      Pork = c(rep(0, MAXROUND*7+1)),
-                      Vegetables = c(rep(0, MAXROUND*7+1)),
-                      Noodles = c(rep(0, MAXROUND*7+1)),
-                      Chicken = c(rep(0, MAXROUND*7+1)),
-                      Total_storage_used = c(rep(0, MAXROUND*7+1)),
-                      Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, MAXROUND*7+1)),
-                      Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, MAXROUND*7+1)),
-                      Revenue = c(rep(0, MAXROUND*7+1)),
-                      Accumulative_Revenue = c(rep(0, MAXROUND*7+1)),
-                      Ordering_cost = c(rep(0, MAXROUND*7+1)),
-                      Cash_on_hand = c(rep(0, MAXROUND*7+1)))
+  initial_stats <- data.frame(Day = c(seq(0, MAXROUND*7)),
+                           Rice = c(rep(0, MAXROUND*7+1)),
+                           Pork = c(rep(0, MAXROUND*7+1)),
+                           Vegetables = c(rep(0, MAXROUND*7+1)),
+                           Noodles = c(rep(0, MAXROUND*7+1)),
+                           Chicken = c(rep(0, MAXROUND*7+1)),
+                           Total_storage_used = c(rep(0, MAXROUND*7+1)),
+                           Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, MAXROUND*7+1)),
+                           Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, MAXROUND*7+1)),
+                           Revenue = c(rep(0, MAXROUND*7+1)),
+                           Accumulative_Revenue = c(rep(0, MAXROUND*7+1)),
+                           Ordering_cost = c(rep(0, MAXROUND*7+1)),
+                           Cash_on_hand = c(rep(0, MAXROUND*7+1)))
   
   # Create the demand_df
-  demand <- data.frame(Day = c(seq(0, MAXROUND*7-1)),
-                       Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
-                       Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
+  initial_demand<- data.frame(Day = c(seq(1, MAXROUND*7)),
+                           Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
+                           Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
   
+  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=NULL,demand=NULL,orderplan=NULL)
+  
+  
+  #------------------------log in---------------------------------------------------------  
   
   observeEvent(input$register, {
     showModal(passwordModal(failed=FALSE))
@@ -303,130 +307,84 @@ server <- function(input, output, session) {
     )
   })
  
-#----------------------------start-------------------------------------------  
-   
+#----------------------------start game-------------------------------------------  
+  observeEvent(input$pork,{
+    vals$orderplan$pork[vals$round] <- input$pork
+    print(paste0('pork:',vals$orderplan$pork[vals$round]))
+  })
+  
+  observeEvent(input$chicken,{
+    vals$orderplan$chicken[vals$round] <- input$chicken
+    print(paste0('chicken:',vals$orderplan$chicken[vals$round]))
+  })
+  
+  observeEvent(input$rice,{
+    vals$orderplan$rice[vals$round] <- input$rice
+    print(paste0('rice:',vals$orderplan$ricen[vals$round]))
+  })
+  
+  observeEvent(input$noodles,{
+    vals$orderplan$noodles[vals$round] <- input$noodles
+    print(paste0('noodles:',vals$orderplan$noodles[vals$round]))
+  })
+  
+  observeEvent(input$vegetables,{
+    vals$orderplan$vegetables[vals$round] <- input$vegetables
+    print(paste0('vegetables:',vals$orderplan$vegetables[vals$round]))
+  })
+  
   observeEvent(input$start, {
     
     if(vals$round>2&&vals$round<=4){
-      
-      demand <- generate_random_demand(vals$round, demand)
-      View(demand)
-      
-      # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
-      stats <- calculate_consumption(vals$round, stats, demand)
-      
-      # Update revenue columns
-      stats <- calculate_revenue(vals$round, stats)
-      View(stats)
-      
-      output$Revenueplot <- renderPlot({
-        ggplot(stats[1:vals$round*7,],mapping=aes(x=Day,y=Accumulative_Revenue))+
-          geom_line()+
-          geom_text(aes(label=Accumulative_Revenue))
-      })
-      output$Inventoryplot <- renderPlot({
-        ggplot(stats[1:vals$round*7,])+
-          geom_line(aes(x=Day,y=Pork,color="red"))+
-          geom_line(aes(x=Day,y=Rice,color="blue"))+
-          geom_line(aes(x=Day,y=Vegetables,color="green"))+
-          geom_line(aes(x=Day,y=Noodles,color="yellow"))+
-          geom_line(aes(x=Day,y=Chicken,color="black"))
-      })
-      output$Demandplot <- renderPlot({
-        ggplot(demand[1:vals$round*7,],mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
-          geom_line()+
-          geom_text(aes(label=Mixed_Vegetable_Rice_Set_A))
-      })
+      #NOT FINISHED
       vals$round=vals$round+1
     }
     
     if(vals$round==2){
-      
-      output$recipe3<-renderUI({
-        tags$img(src='SetA.png')
-      })
-      
-      output$recipe4<-renderUI({
-        tags$img(src='SetB.png')
-      })
-      
-      output$recipe3<-renderUI({
-        tags$img(src='SetC.png')
-      })
-      
-      demand <- generate_random_demand(vals$round, demand)
-      View(demand)
-      
-      # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
-      stats <- calculate_consumption(vals$round, stats, demand)
-      
-      # Update revenue columns
-      stats <- calculate_revenue(vals$round, stats)
-      View(stats)
-      
-      output$Revenueplot <- renderPlot({
-        ggplot(stats[1:vals$round*7,],mapping=aes(x=Day,y=Accumulative_Revenue))+
-          geom_line()+
-          geom_text(aes(label=Accumulative_Revenue))
-      })
-      output$Inventoryplot <- renderPlot({
-        ggplot(stats[1:vals$round*7,])+
-          geom_line(aes(x=Day,y=Pork,color="red"))+
-          geom_line(aes(x=Day,y=Rice,color="blue"))+
-          geom_line(aes(x=Day,y=Vegetables,color="green"))+
-          geom_line(aes(x=Day,y=Noodles,color="yellow"))+
-          geom_line(aes(x=Day,y=Chicken,color="black"))
-      })
-      output$Demandplot <- renderPlot({
-        ggplot(demand[1:vals$round*7,],mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
-          geom_line()+
-          geom_text(aes(label=Mixed_Vegetable_Rice_Set_A))
-      })
+      #NOT FINISHED
       vals$round=vals$round+1
-      
     }
     
     if(vals$round==1){
-    
-    stats <- data.frame(Day = c(seq(0, MAXROUND*7-1)),
-                        Rice = c(input$rice, rep(0, MAXROUND*7-1)),
-                        Pork = c(input$pork, rep(0, MAXROUND*7-1)),
-                        Vegetables = c(input$vegetables, rep(0, MAXROUND*7-1)),
-                        Noodles = c(input$noodles, rep(0, MAXROUND*7-1)),
-                        Chicken = c(input$chicken, rep(0, MAXROUND*7-1)),
-                        Total_storage_used = c(input$rice+input$pork+input$vegetables+input$noodles+input$chicken, rep(0, MAXROUND*7-1)),
-                        Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, MAXROUND*7)),
-                        Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, MAXROUND*7)),
-                        Revenue = c(rep(0, MAXROUND*7)),
-                        Accumulative_Revenue = c(rep(0, MAXROUND*7)),
-                        Ordering_cost = c(rep(0, MAXROUND*7)),
-                        Cash_on_hand = c(rep(0, MAXROUND*7)))
-    
-    # Create the demand_df
-    demand <- data.frame(Day = c(seq(0, MAXROUND*7-1)),
-                         Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
-                         Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
+      print(paste0('now is round',vals$round))
+      
 
-    
-    # Generate demand for Round 1
-    demand <- generate_random_demand(vals$round, demand)
-    View(demand)
-    
-    # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
-    stats <- calculate_consumption(vals$round, stats, demand)
-    
-    # Update revenue columns
-    stats <- calculate_revenue(vals$round, stats)
-    View(stats)
-    print(paste0('now is round',vals$round))
-    
+      
+      vals$stats[vals$stats$Day==0,"Total_storage_used"]<-sum(vals$orderplan[1,])
+      print('total storage updated')
+      
+      vals$stats[vals$stats$Day==0,"Cash_on_hand"]<-Initial_cash_on_hand-vals$stats[vals$stats$Day==0,"Ordering_cost"]
+      print('initialze cash-on-hand')
+      
+      vals$stats<-update_storage_used(vals$round,vals$orderplan,vals$stats)
+      print('update inventory')
+      
+      vals$demand<- generate_random_demand(vals$round, vals$demand)
+      print('demand generated')
+      
+      vals$stats <- calculate_orderingcost(vals$round,vals$orderplan,vals$stats)
+      print('ordering cost')
+      
+      # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
+      vals$stats <- calculate_consumption(vals$round, vals$stats, vals$demand)
+      print('consumed')
+      
+      # Update revenue columns
+      vals$stats <- calculate_revenue(vals$round, vals$stats)
+      print('update revenue')
+      
+      # Update cash_on_hand
+      vals$stats <- calculate_cash_on_hand(vals$round,vals$stats)
+      print('cash-on-hand')
+      
     output$Revenueplot <- renderPlot({
-      ggplot(stats[1:vals$round*7,],mapping=aes(x=Day,y=Accumulative_Revenue))+
+      ggplot(vals$stats[0:7,],mapping=aes(x=Day,y=Cash_on_hand))+
         geom_line()+
-        geom_text(aes(label=Accumulative_Revenue))
+        geom_text(aes(label=Cash_on_hand))
     })
+    
     output$Inventoryplot <- renderPlot({
-      ggplot(stats[1:vals$round*7,])+
+      ggplot(vals$stats[0:7,])+
         geom_line(aes(x=Day,y=Pork,color="red"))+
         geom_line(aes(x=Day,y=Rice,color="blue"))+
         geom_line(aes(x=Day,y=Vegetables,color="green"))+
@@ -434,7 +392,7 @@ server <- function(input, output, session) {
         geom_line(aes(x=Day,y=Chicken,color="black"))
     })
     output$Demandplot <- renderPlot({
-      ggplot(demand[1:vals$round*7,],mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
+      ggplot(vals$demand[0:7,],mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
         geom_line()+
         geom_text(aes(label=Mixed_Vegetable_Rice_Set_A))
     })
@@ -447,7 +405,7 @@ server <- function(input, output, session) {
     
   })
   
-  
+#-----------------------------------leaderboard---------------------------------------------  
   # to be editted
   output$leaderboard <- renderTable({numclicks <- input$publishscore +input$start #to force a refresh whenever one of these buttons is clicked
   leaderboard <- getLeaderBoard(vals$gamevariantid)
