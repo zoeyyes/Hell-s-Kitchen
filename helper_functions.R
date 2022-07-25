@@ -197,7 +197,7 @@ getLeaderBoard <- function(){
   result
 }
 
-#----------------------------game-------------------------------------------
+#----------------------------game----------------------------------------------
 
 generate_random_demand <- function(round_number, demand_df) {
   
@@ -417,6 +417,7 @@ round<-1
 
 #order 1st round
 orderplan<-form_orderplan_df(orderplan,500,500,500,200,200)
+
 stats_test_df[stats_test_df$Day==0,"Total_storage_used"]<-sum(orderplan[1,])
 stats_test_df[stats_test_df$Day==0,"Cash_on_hand"]<-Initial_cash_on_hand-stats_test_df[stats_test_df$Day==0,"Ordering_cost"]
 
@@ -440,6 +441,10 @@ stats_test_df <- calculate_cash_on_hand(1,stats_test_df)
 
 View(stats_test_df)
 View(demand_test_df)
+#----------------------------testing start (round2)-------------------------------------------
+
+
+
 
 
 #----------------------------testing start (round2)-------------------------------------------
