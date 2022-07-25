@@ -86,6 +86,7 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == (day - 1), "Pork"] - pork_consumed
     
     vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_A
+    print(vegetables_consumed)
     stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == (day - 1), "Vegetables"] - vegetables_consumed
     
     # Priority 2: Sell Cai Fan Set B
