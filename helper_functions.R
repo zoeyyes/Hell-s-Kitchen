@@ -274,8 +274,8 @@ update_storage_used<-function(round,orderplan,stats){
   if(round==1){
     stats[stats$Day==0,'Chicken']<-orderplan[round,'chicken']
     stats[stats$Day==0,'Pork']<-orderplan[round,'pork']
-    stats[stats$Day==0,'Noodles']<-orderplan[round,'noodle']
-    stats[stats$Day==0,'Vegetables']<-orderplan[round,'vegetable']
+    stats[stats$Day==0,'Noodles']<-orderplan[round,'noodles']
+    stats[stats$Day==0,'Vegetables']<-orderplan[round,'vegetables']
     stats[stats$Day==0,'Rice']<-orderplan[round,'rice']
     print(stats[stats$Day==0,'Chicken'])
     print(stats[stats$Day==0,'Rice'])
@@ -284,8 +284,8 @@ update_storage_used<-function(round,orderplan,stats){
     purchase_day<-round*7-6
     stats[stats$Day==(purchase_day-1),'Chicken']<-stats[stats$Day==(purchase_day-1),'Chicken']+orderplan[round,'chicken']
     stats[stats$Day==(purchase_day-1),'Pork']<-stats[stats$Day==(purchase_day-1),'Pork']+orderplan[round,'pork']
-    stats[stats$Day==(purchase_day-1),'Noodles']<-stats[stats$Day==(purchase_day-1),'Noodles']+orderplan[round,'noodle']
-    stats[stats$Day==(purchase_day-1),'Vegetables']<-stats[stats$Day==(purchase_day-1),'Vegetables']+orderplan[round,'vegetable']
+    stats[stats$Day==(purchase_day-1),'Noodles']<-stats[stats$Day==(purchase_day-1),'Noodles']+orderplan[round,'noodles']
+    stats[stats$Day==(purchase_day-1),'Vegetables']<-stats[stats$Day==(purchase_day-1),'Vegetables']+orderplan[round,'vegetables']
     stats[stats$Day==(purchase_day-1),'Rice']<-stats[stats$Day==(purchase_day-1),'Rice']+orderplan[round,'rice']
     stats
   }
@@ -388,13 +388,21 @@ calculate_cash_on_hand<-function(round,stats_df){
    stats_df
 }
 
-
+MaxroundModal<-function(failed=FALSE){
+  modalDialog(
+    if (failed)
+      div(tags$b("You have tried 5 rounds.", style = "color: red;")),
+    footer = tagList(
+      modalButton("OK")
+    )
+  )
+}
 #----------------------------testing initialization-------------------------------------------
 MAXROUND<-2
 Initial_cash_on_hand<-20000
 
 orderplan<-data.frame(matrix(ncol = 5, nrow = 0))
-colnames(orderplan)<-c('chicken', 'pork', 'noodle', 'rice', 'vegetable')
+colnames(orderplan)<-c('chicken', 'pork', 'noodles', 'rice', 'vegetables')
 
 
 stats_test_df <- data.frame(Day = c(seq(0, MAXROUND*7)),

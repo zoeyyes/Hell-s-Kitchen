@@ -136,7 +136,7 @@ ui <- dashboardPage(
                     img(src='SetB.png',height='100px',width='100px'),
                     uiOutput("recipe5")),
                 tabBox(width = 4,height = '320px', 
-                       tabPanel('Revenue',plotOutput("Revenueplot")),
+                       tabPanel('Cash-on-hand',plotOutput("Cash_on_hand_plot")),
                        tabPanel('Demand',plotOutput("Demandplot")),
                        tabPanel('Inventory',plotOutput("Inventoryplot"))))
       ),
@@ -335,13 +335,49 @@ server <- function(input, output, session) {
   
   observeEvent(input$start, {
     
-    if(vals$round>2&&vals$round<=4){
+    if(vals$round>MAXROUND){
       #NOT FINISHED
-      vals$round=vals$round+1
+      showModal(MaxroundModal(failed=TRUE))
     }
     
-    if(vals$round==2){
+    if(vals$round>1){
       #NOT FINISHED
+      print(paste('now is round',vals$round))
+      
+      vals$stats<-update_storage_used(vals$round,vals$orderplan,vals$stats)
+      
+      vals$demand <- generate_random_demand(vals$round, vals$demand)
+      
+      vals$stats <- calculate_orderingcost(vals$round,vals$orderplan,vals$stats)
+      
+      vals$stats <- calculate_consumption(vals$round, vals$stats, vals$demand)
+      
+      vals$stats <- calculate_revenue(vals$round, vals$stats)
+      
+      vals$stats <- calculate_cash_on_hand(vals$round,vals$stats)
+      
+      output$Cash_on_hand_plot <- renderPlot({
+        ggplot(vals$stats[0:7*vals$round,],mapping=aes(x=Day,y=Cash_on_hand))+
+          geom_line()+
+          geom_text(aes(label=Cash_on_hand))
+      })
+      
+      output$Inventoryplot <- renderPlot({
+        ggplot(vals$stats[0:7*vals$round,])+
+          geom_line(aes(x=Day,y=Pork,color="red"))+
+          geom_line(aes(x=Day,y=Rice,color="blue"))+
+          geom_line(aes(x=Day,y=Vegetables,color="green"))+
+          geom_line(aes(x=Day,y=Noodles,color="yellow"))+
+          geom_line(aes(x=Day,y=Chicken,color="black"))
+      })
+      
+      output$Demandplot <- renderPlot({
+        ggplot(vals$demand[0:7*vals$round,])+
+          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='red'))+
+          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))
+        
+      })
+      
       vals$round=vals$round+1
     }
     
@@ -362,11 +398,6 @@ server <- function(input, output, session) {
       vals$stats <- calculate_orderingcost(vals$round,vals$orderplan,vals$stats)
       print('ordering cost')
       
-      view(vals$orderplan)
-      view(vals$stats)
-      view(vals$demand)
-      
-      
       #error occurs
       vals$stats<-update_storage_used(vals$round,vals$orderplan,vals$stats)
       print('update inventory')
@@ -383,7 +414,7 @@ server <- function(input, output, session) {
       vals$stats <- calculate_cash_on_hand(vals$round,vals$stats)
       print('cash-on-hand')
       
-    output$Revenueplot <- renderPlot({
+    output$Cash_on_hand_plot <- renderPlot({
       ggplot(vals$stats[0:7,],mapping=aes(x=Day,y=Cash_on_hand))+
         geom_line()+
         geom_text(aes(label=Cash_on_hand))
@@ -398,9 +429,10 @@ server <- function(input, output, session) {
         geom_line(aes(x=Day,y=Chicken,color="black"))
     })
     output$Demandplot <- renderPlot({
-      ggplot(vals$demand[0:7,],mapping=aes(x=Day,y=Mixed_Vegetable_Rice_Set_A))+
-        geom_line()+
-        geom_text(aes(label=Mixed_Vegetable_Rice_Set_A))
+      ggplot(vals$demand[0:7,])+
+        geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='red'))+
+        geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))
+        
     })
     
     vals$round=vals$round+1
