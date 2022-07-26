@@ -277,6 +277,9 @@ update_storage_used<-function(round,orderplan,stats){
     stats[stats$Day==0,'Noodles']<-orderplan[round,'noodle']
     stats[stats$Day==0,'Vegetables']<-orderplan[round,'vegetable']
     stats[stats$Day==0,'Rice']<-orderplan[round,'rice']
+    print(stats[stats$Day==0,'Chicken'])
+    print(stats[stats$Day==0,'Rice'])
+    stats
   }else{
     purchase_day<-round*7-6
     stats[stats$Day==(purchase_day-1),'Chicken']<-stats[stats$Day==(purchase_day-1),'Chicken']+orderplan[round,'chicken']
@@ -284,8 +287,9 @@ update_storage_used<-function(round,orderplan,stats){
     stats[stats$Day==(purchase_day-1),'Noodles']<-stats[stats$Day==(purchase_day-1),'Noodles']+orderplan[round,'noodle']
     stats[stats$Day==(purchase_day-1),'Vegetables']<-stats[stats$Day==(purchase_day-1),'Vegetables']+orderplan[round,'vegetable']
     stats[stats$Day==(purchase_day-1),'Rice']<-stats[stats$Day==(purchase_day-1),'Rice']+orderplan[round,'rice']
+    stats
   }
-  stats
+  
   
 }
 
@@ -418,7 +422,7 @@ round<-1
 orderplan<-form_orderplan_df(orderplan,500,500,500,200,200)
 
 stats_test_df[stats_test_df$Day==0,"Total_storage_used"]<-sum(orderplan[1,])
-stats_test_df[stats_test_df$Day==0,"Cash_on_hand"]<-Initial_cash_on_hand-stats_test_df[stats_test_df$Day==0,"Ordering_cost"]
+stats_test_df[stats_test_df$Day==0,"Cash_on_hand"]<-Initial_cash_on_hand
 
 #transfer inventory to stats_test_df
 stats_test_df<-update_storage_used(round,orderplan,stats_test_df)

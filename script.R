@@ -159,8 +159,8 @@ server <- function(input, output, session) {
   MAXROUND<-5
   Initial_cash_on_hand<-20000
   
-  initial_orderplan<-data.frame(matrix(ncol = 5, nrow = 0))
-  colnames(vals$orderplan)<-c('chicken', 'pork', 'noodles', 'rice', 'vegetables')
+  initial_orderplan<-data.frame(matrix(ncol = 5, nrow = MAXROUND))
+  colnames(initial_orderplan)<-c('chicken', 'pork', 'noodles', 'rice', 'vegetables')
   
   initial_stats <- data.frame(Day = c(seq(0, MAXROUND*7)),
                            Rice = c(rep(0, MAXROUND*7+1)),
@@ -176,12 +176,12 @@ server <- function(input, output, session) {
                            Ordering_cost = c(rep(0, MAXROUND*7+1)),
                            Cash_on_hand = c(rep(0, MAXROUND*7+1)))
   
-  # Create the demand_df
+  
   initial_demand<- data.frame(Day = c(seq(1, MAXROUND*7)),
                            Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
                            Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
   
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=NULL,demand=NULL,orderplan=NULL)
+  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=initial_stats,demand=initial_demand,orderplan=initial_orderplan)
   
   
   #------------------------log in---------------------------------------------------------  
@@ -307,7 +307,7 @@ server <- function(input, output, session) {
     )
   })
  
-#----------------------------start game-------------------------------------------  
+#----------------------------start game--------------------------------------------------------------  
   observeEvent(input$pork,{
     vals$orderplan$pork[vals$round] <- input$pork
     print(paste0('pork:',vals$orderplan$pork[vals$round]))
@@ -320,7 +320,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$rice,{
     vals$orderplan$rice[vals$round] <- input$rice
-    print(paste0('rice:',vals$orderplan$ricen[vals$round]))
+    print(paste0('rice:',vals$orderplan$rice[vals$round]))
   })
   
   observeEvent(input$noodles,{
@@ -346,24 +346,31 @@ server <- function(input, output, session) {
     }
     
     if(vals$round==1){
-      print(paste0('now is round',vals$round))
-      
-
+      print(paste('now is round',vals$round))
       
       vals$stats[vals$stats$Day==0,"Total_storage_used"]<-sum(vals$orderplan[1,])
       print('total storage updated')
       
-      vals$stats[vals$stats$Day==0,"Cash_on_hand"]<-Initial_cash_on_hand-vals$stats[vals$stats$Day==0,"Ordering_cost"]
+      vals$stats[vals$stats$Day==0,"Cash_on_hand"]<-Initial_cash_on_hand
       print('initialze cash-on-hand')
       
-      vals$stats<-update_storage_used(vals$round,vals$orderplan,vals$stats)
-      print('update inventory')
-      
+    
       vals$demand<- generate_random_demand(vals$round, vals$demand)
       print('demand generated')
       
+      
       vals$stats <- calculate_orderingcost(vals$round,vals$orderplan,vals$stats)
       print('ordering cost')
+      
+      view(vals$orderplan)
+      view(vals$stats)
+      view(vals$demand)
+      
+      update_storage_used(vals$round,vals$orderplan,vals$stats)
+      print('run')
+      
+      vals$stats<-update_storage_used(vals$round,vals$orderplan,vals$stats)
+      print('update inventory')
       
       # Deduct inventory stats based on dishes' demand in Round 1 + Update number of each dish sold
       vals$stats <- calculate_consumption(vals$round, vals$stats, vals$demand)
