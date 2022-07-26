@@ -366,9 +366,8 @@ server <- function(input, output, session) {
       view(vals$stats)
       view(vals$demand)
       
-      update_storage_used(vals$round,vals$orderplan,vals$stats)
-      print('run')
       
+      #error occurs
       vals$stats<-update_storage_used(vals$round,vals$orderplan,vals$stats)
       print('update inventory')
       
