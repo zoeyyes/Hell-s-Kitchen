@@ -1,4 +1,4 @@
-# tmB4qqNs
+#tmB4qqNs
 source("setAWSPassword.R")
 source("usePackages.R")
 loadPkgs(c("tidyverse","shiny","DBI"))
@@ -23,6 +23,15 @@ passwordModal <- function(failed = FALSE) {
   )
 }
 
+warningModel <- function(){
+  modalDialog(
+    title='WARNING',
+    "Your order cost is more than your cash_on_hand,please renter your inventory",
+    footer = tagList(
+      modalButton('OK')
+    )
+  )
+}
 reEnterPasswordModal<-function(failed=FALSE,playername){
   modalDialog(
     title = paste('Re-enter your current password,',playername),
@@ -45,7 +54,6 @@ UpdatePasswordModal <- function(failed = FALSE) {
     "If successful, you will be able to re-login using your new password.",
     if (failed)
       div(tags$b("The passwords do not match. Try again.", style = "color: red;")),
-    
     footer = tagList(
       modalButton("Cancel"),
       actionButton("newpasswordok", "OK")
@@ -280,7 +288,7 @@ update_storage_used<-function(round,orderplan,stats){
     print(stats[stats$Day==0,'Chicken'])
     print(stats[stats$Day==0,'Rice'])
     stats
-  }else{
+    }else{
     purchase_day<-round*7-6
     stats[stats$Day==(purchase_day-1),'Chicken']<-stats[stats$Day==(purchase_day-1),'Chicken']+orderplan[round,'chicken']
     stats[stats$Day==(purchase_day-1),'Pork']<-stats[stats$Day==(purchase_day-1),'Pork']+orderplan[round,'pork']
@@ -329,6 +337,8 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Total_storage_used"] <- stats_df[stats_df$Day == day, "Rice"] + stats_df[stats_df$Day == day, "Pork"] + stats_df[stats_df$Day == day, "Vegetables"] + stats_df[stats_df$Day == day, "Noodles"] + stats_df[stats_df$Day == day, "Chicken"]
     # Priority 1: Sell Cai Fan Set A
     # Find the max number of Cai Fan Set A that can be sold.
+    print("1")
+    print(day)
     if (stats_df[stats_df$Day == day, "Vegetables"] == 0){
       max_no_mixed_veg_rice_set_A <- 0
       }else{
@@ -338,6 +348,7 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
                                                demand_df[demand_df$Day == day, 'Mixed_Vegetable_Rice_Set_A'] # If there is an excess of ingredients, max_no == demand for the day
       )
       )
+      print("2")
       if (max_no_mixed_veg_rice_set_A<0){max_no_mixed_veg_rice_set_A<-0}
       print('set A max sold')
       print(max_no_mixed_veg_rice_set_A)

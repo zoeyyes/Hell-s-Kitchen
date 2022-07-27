@@ -1,4 +1,3 @@
-
 source('helper_functions.R')
 library(shiny)
 library(shinyjs)
@@ -248,10 +247,10 @@ server <- function(input, output, session) {
     if (input$currentPassword == vals$password){
       #removeModal()
       print('yes')
-      showModal(UpdatePasswordModal(failed = FALSE))
+      showModal(UpdatePasswordModal(failed =FALSE))
     } else {
       print('no')
-      showModal(reEnterPasswordModal(failed = TRUE,vals$playername))
+      showModal(reEnterPasswordModal(failed = FALSE,vals$playername))
     }
   })
   
@@ -359,7 +358,9 @@ server <- function(input, output, session) {
       output$Cash_on_hand_plot <- renderPlot({
         ggplot(vals$stats[0:7*vals$round,],mapping=aes(x=Day,y=Cash_on_hand))+
           geom_line()+
-          geom_text(aes(label=Cash_on_hand))
+          geom_text(aes(label=Cash_on_hand))+
+          labs(x="Day", y="Cash_on_hand")+
+          title="Cash_on_hand vs Day"
       })
       
       output$Inventoryplot <- renderPlot({
@@ -374,11 +375,13 @@ server <- function(input, output, session) {
       output$Demandplot <- renderPlot({
         ggplot(vals$demand[0:7*vals$round,])+
           geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='red'))+
-          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))
+          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))+
+          labs(x="Day", y="Demand")+
+          title="Demand vs Day"
         
       })
       
-      vals$round=vals$round+1
+      vals$round <- vals$round+1
     }
     
     if(vals$round==1){
@@ -435,7 +438,7 @@ server <- function(input, output, session) {
         
     })
     
-    vals$round=vals$round+1
+    vals$round <- vals$round+1
     
     }
     
