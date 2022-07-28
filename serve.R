@@ -377,9 +377,8 @@ server <- function(input, output, session) {
           ggplot(vals$demand[0:7*vals$round,])+
             geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='red'))+
             geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))
-          print("plot3")    
         })
-        
+        print("plot3")
         vals$round <- vals$round+1
       }else{
         showModal(warningModel())
