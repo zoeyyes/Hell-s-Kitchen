@@ -358,14 +358,15 @@ server <- function(input, output, session) {
         View(vals$stats)
         View(vals$orderplan)
         View(vals$demand)
+        row_num <- 7*vals$round
         output$Cash_on_hand_plot <- renderPlot({
-          ggplot(vals$stats[0:7*vals$round,],mapping=aes(x=Day,y=Cash_on_hand))+
+          ggplot(vals$stats[0:row_num,],mapping=aes(x=Day,y=Cash_on_hand))+
             geom_line()+
             geom_text(aes(label=Cash_on_hand))
         })
         print("plot1")
         output$Inventoryplot <- renderPlot({
-          ggplot(vals$stats[0:7*vals$round,])+
+          ggplot(vals$stats[0:row_num,])+
             geom_line(aes(x=Day,y=Pork,color="red"))+
             geom_line(aes(x=Day,y=Rice,color="blue"))+
             geom_line(aes(x=Day,y=Vegetables,color="green"))+
@@ -374,7 +375,7 @@ server <- function(input, output, session) {
         })
         print("plot2")
         output$Demandplot <- renderPlot({
-          ggplot(vals$demand[0:7*vals$round,])+
+          ggplot(vals$demand[0:row_num,])+
             geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='red'))+
             geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))
         })
