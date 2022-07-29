@@ -362,22 +362,25 @@ server <- function(input, output, session) {
         output$Cash_on_hand_plot <- renderPlot({
           ggplot(vals$stats[0:row_num,],mapping=aes(x=Day,y=Cash_on_hand))+
             geom_line()+
-            geom_text(aes(label=Cash_on_hand))
+            geom_text(aes(label=Cash_on_hand))+
+            labs(x="Day",y="Cash on hand",title = "Cash on hand VS Day")
         })
         print("plot1")
         output$Inventoryplot <- renderPlot({
           ggplot(vals$stats[0:row_num,])+
-            geom_line(aes(x=Day,y=Pork,color="red"))+
-            geom_line(aes(x=Day,y=Rice,color="blue"))+
-            geom_line(aes(x=Day,y=Vegetables,color="green"))+
-            geom_line(aes(x=Day,y=Noodles,color="yellow"))+
-            geom_line(aes(x=Day,y=Chicken,color="black"))
+            geom_line(aes(x=Day,y=Pork,color="Pork"))+
+            geom_line(aes(x=Day,y=Rice,color="Rice"))+
+            geom_line(aes(x=Day,y=Vegetables,color="Vegetables"))+
+            geom_line(aes(x=Day,y=Noodles,color="Noodles"))+
+            geom_line(aes(x=Day,y=Chicken,color="Chicken"))+
+            xlab("Day")+ylab("Inventory")
         })
         print("plot2")
         output$Demandplot <- renderPlot({
           ggplot(vals$demand[0:row_num,])+
-            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='red'))+
-            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='Mixed_Vegetable_Rice_Set_A'))+
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='Mixed_Vegetable_Rice_Set_B'))+
+            xlab("Day")+ylab("Demand")
         })
         print("plot3")
         vals$round <- vals$round+1
@@ -429,16 +432,18 @@ server <- function(input, output, session) {
       
       output$Inventoryplot <- renderPlot({
         ggplot(vals$stats[0:7,])+
-          geom_line(aes(x=Day,y=Pork,color="red"))+
-          geom_line(aes(x=Day,y=Rice,color="blue"))+
-          geom_line(aes(x=Day,y=Vegetables,color="green"))+
-          geom_line(aes(x=Day,y=Noodles,color="yellow"))+
-          geom_line(aes(x=Day,y=Chicken,color="black"))
+          geom_line(aes(x=Day,y=Pork,color="Pork"))+
+          geom_line(aes(x=Day,y=Rice,color="Rice"))+
+          geom_line(aes(x=Day,y=Vegetables,color="Vegetables"))+
+          geom_line(aes(x=Day,y=Noodles,color="Noodles"))+
+          geom_line(aes(x=Day,y=Chicken,color="Chicken"))+
+          xlab("Day")+ylab("Inventory")
       })
       output$Demandplot <- renderPlot({
-        ggplot(vals$demand[0:7,])+
-          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='red'))+
-          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='blue'))
+        ggplot(vals$demand[0:row_num,])+
+          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='Mixed_Vegetable_Rice_Set_A'))+
+          geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='Mixed_Vegetable_Rice_Set_B'))+
+          xlab("Day")+ylab("Demand")
         
       })
       
