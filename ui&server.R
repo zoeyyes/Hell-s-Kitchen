@@ -440,7 +440,7 @@ server <- function(input, output, session) {
           xlab("Day")+ylab("Inventory")
       })
       output$Demandplot <- renderPlot({
-        ggplot(vals$demand[0:row_num,])+
+        ggplot(vals$demand[0:7,])+
           geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='Mixed_Vegetable_Rice_Set_A'))+
           geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='Mixed_Vegetable_Rice_Set_B'))+
           xlab("Day")+ylab("Demand")
