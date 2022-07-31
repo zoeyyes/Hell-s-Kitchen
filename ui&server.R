@@ -145,7 +145,8 @@ ui <- dashboardPage(
       # Analysis tab content
       tabItem(tabName = 'analysis',
               h2('Weekly analysis'),
-              tableOutput("analysis")
+              tableOutput("analysis"),
+              tableOutput("dishes")
               ),
       
       tabItem(tabName = 'scores',
@@ -192,16 +193,19 @@ server <- function(input, output, session) {
                                  Pork_Sold = c(rep(0, 5)),
                                  Vegetables_Sold = c(rep(0, 5)),
                                  Noodles_Sold = c(rep(0, 5)),
-                                 Chicken_Sold = c(rep(0, 5)),
-                                 Set_A_Demand = c(rep(0, 5)),
-                                 Set_A_Sold = c(rep(0, 5)),
-                                 Set_A_Lost = c(rep(0, 5)),
-                                 Set_B_Demand = c(rep(0, 5)),
-                                 Set_B_Sold = c(rep(0, 5)),
-                                 Set_B_Lost = c(rep(0, 5)))
+                                 Chicken_Sold = c(rep(0, 5)))
+  
+  initial_dishes <-data.frame(Week = c (seq(1,5)),
+                              Set_A_Demand = c(rep(0, 5)),
+                              Set_A_Sold = c(rep(0, 5)),
+                              Set_A_Lost = c(rep(0, 5)),
+                              Set_B_Demand = c(rep(0, 5)),
+                              Set_B_Sold = c(rep(0, 5)),
+                              Set_B_Lost = c(rep(0, 5)))
   
   
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=initial_stats,demand=initial_demand,orderplan=initial_orderplan,weekly_plan=initial_analysis)
+  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=initial_stats,demand=initial_demand,orderplan=initial_orderplan,weekly_plan=initial_analysis,dishes=initial_dishes)
+  
   
   #------------------------log in---------------------------------------------------------  
   
@@ -428,17 +432,18 @@ server <- function(input, output, session) {
         print("plot3")
         week<-vals$round
         View(vals$weekly_plan)
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_A)-vals$weekly_plan[vals$weekly_plan$Week==week-1,"Set_A_Demand"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_A)-vals$weekly_plan[vals$weekly_plan$Week==week-1,"Set_A_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Lost"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_B)-vals$weekly_plan[vals$weekly_plan$Week==week-1,"Set_B_Demand"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_B)-vals$weekly_plan[vals$weekly_plan$Week==week-1,"Set_B_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Lost"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Rice_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Pork_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]*2+vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]*2
+        View(vals$weekly_plan)
+        vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_A)-vals$dishes[vals$dishes$Week==week-1,"Set_A_Demand"]
+        vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_A)-vals$dishes[vals$dishes$Week==week-1,"Set_A_Sold"]
+        vals$dishes[vals$dishes$Week==week,"Set_A_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
+        vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_B)-vals$dishes[vals$dishes$Week==week-1,"Set_B_Demand"]
+        vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_B)-vals$dishes[vals$dishes$Week==week-1,"Set_B_Sold"]
+        vals$dishes[vals$dishes$Week==week,"Set_B_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
+        vals$weekly_plan[vals$weekly_plan$Week==week,"Rice_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
+        vals$weekly_plan[vals$weekly_plan$Week==week,"Pork_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
+        vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]*2+vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
+        vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
+        vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]*2
         vals$round <- vals$round+1
       }else{
         showModal(warningModel())
@@ -503,22 +508,23 @@ server <- function(input, output, session) {
         
       })
       week<-vals$round
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_A)
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_A)
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Lost"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_B)
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_B)
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Lost"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Rice_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Pork_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_A_Demand"]*2+vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$weekly_plan[vals$weekly_plan$Week==week,"Set_B_Demand"]*2
+      vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_A)
+      vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_A)
+      vals$dishes[vals$dishes$Week==week,"Set_A_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
+      vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_B)
+      vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_B)
+      vals$dishes[vals$dishes$Week==week,"Set_B_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
+      vals$weekly_plan[vals$weekly_plan$Week==week,"Rice_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
+      vals$weekly_plan[vals$weekly_plan$Week==week,"Pork_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
+      vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]*2+vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
+      vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
+      vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]*2
       
       vals$round <- vals$round+1
       
     }}
     output$analysis <- renderTable(head(vals$weekly_plan))
+    output$dishes <- renderTable(head(vals$dishes))
     updateNumericInput(session,'pork',value = 0)
     updateNumericInput(session,'chicken',value = 0)
     updateNumericInput(session,'noodles',value = 0)
