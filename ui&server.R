@@ -107,11 +107,11 @@ ui <- dashboardPage(
       tabItem(tabName = "game",
               fluidRow(
                 column(3,tags$div(id="inputsection"),
-                       numericInput("pork","PORK",1,min=1),
-                       numericInput("chicken","CHICKEN",1,min=1),
-                       numericInput("rice","RICE",1,min=1),
-                       numericInput("noodles","NOODLES",1,min=1),
-                       numericInput("vegetables","VEGETABLESset",1,min=1),
+                       numericInput("pork","PORK",0),
+                       numericInput("chicken","CHICKEN",0),
+                       numericInput("rice","RICE",0),
+                       numericInput("noodles","NOODLES",0),
+                       numericInput("vegetables","VEGETABLESset",0),
                        div(style = "color:brown, font-size=500%",align='center', 
                            'INVENTORY LIMIT: 5000'),
                        div(align='center',uiOutput('startbutton'))),
@@ -190,18 +190,23 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$passwordok, {
+   
+    
     if (str_length(input$password1) >0 && (input$password1 == input$password2)) {
       vals$password <- input$password1
       print(vals$password) 
       vals$playername = input$playername
-      registerPlayer(vals$playername,vals$password)
-      if (!is.null(vals$playername)){
-        vals$playerid <- getPlayerID(vals$playername,vals$password)
-      }
-      print(vals$playerid)
-      removeModal()
-    } else {
-      showModal(passwordModal(failed = TRUE))
+      #####return false if error (duplicated username)
+      unique<-registerPlayer(vals$playername,vals$password)
+      
+      if(unique){
+          if (!is.null(vals$playername)){
+            vals$playerid <- getPlayerID(vals$playername,vals$password)
+          }
+          removeModal()
+      }else{showModal(passwordModal(failed = TRUE,duplicated=TRUE,password_wrong=FALSE))}
+    }else{
+        showModal(passwordModal(failed = TRUE,duplicated=FALSE,password_wrong=TRUE))
     }
   })
   
@@ -332,7 +337,18 @@ server <- function(input, output, session) {
     print(paste0('vegetables:',vals$orderplan$vegetables[vals$round]))
   })
   
-  observeEvent(input$start, {
+  observeEvent(input$start,{
+    showModal(ConfirmStartModal(vals$round))
+  })
+  
+  observeEvent(input$confirm, {
+    
+    removeModal()
+    
+    if(vals$orderplan$chicken[vals$round]<0 | vals$orderplan$pork[vals$round]<0 | vals$orderplan$rice[vals$round]<0 | vals$orderplan$noodles[vals$round]<0 | vals$orderplan$vegetables[vals$round]<0){
+      showModal(NegativeInvenModal())
+    }else{
+    
     
     if(vals$round>MAXROUND){
       #NOT FINISHED
@@ -449,7 +465,13 @@ server <- function(input, output, session) {
       
       vals$round <- vals$round+1
       
-    }
+    }}
+    
+    updateNumericInput(session,'pork',value = 0)
+    updateNumericInput(session,'chicken',value = 0)
+    updateNumericInput(session,'noodles',value = 0)
+    updateNumericInput(session,'rice',value = 0)
+    updateNumericInput(session,'vegetables',value = 0)
     
     
     
