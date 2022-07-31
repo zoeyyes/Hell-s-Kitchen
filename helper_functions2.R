@@ -461,13 +461,13 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     # Update each day's stats based on ingredients consumed
     stats_df[stats_df$Day == day, "Noodles"] <- stats_df[stats_df$Day == day, "Noodles"] - noodles_consumed
     
-    pork_consumed <- 3 * max_no_jap_bowl_B_sold
+    pork_consumed <- 3 * max_no_ultimate_bowl_sold
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
-    chicken_consumed <- 3 * max_no_jap_bowl_B_sold
+    chicken_consumed <- 3 * max_no_ultimate_bowl_sold
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - chicken_consumed
     
-    vegetables_consumed <- 2 * max_no_jap_bowl_B_sold
+    vegetables_consumed <- 2 * max_no_ultimate_bowl_sold
     stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == day, "Vegetables"] - vegetables_consumed
     
     
@@ -579,14 +579,7 @@ calculate_revenue <- function (round_number, stats_df) {
     # Set the price of each dish
     caifan_A_price <- 5
     caifan_B_price <- 6.5
-    jap_bowl_A_price <- 10
-    jap_bowl_B_price <- 12
-    ultimate_bowl_price <- 15
-    stats_df[stats_df$Day == day, "Revenue"] <- (stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price +
-                                                   stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price +
-                                                   stats_df[stats_df$Day == day, "Japanese_Bowl_A_Sold"] * jap_bowl_A_price +
-                                                   stats_df[stats_df$Day == day, "Japanese_Bowl_B_Sold"] * jap_bowl_B_price +
-                                                   stats_df[stats_df$Day == day, "Ultimate_Bowl_Sold"] * ultimate_bowl_price)
+    stats_df[stats_df$Day == day, "Revenue"] <- stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price + stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price
     stats_df[stats_df$Day == day, "Accumulative_Revenue"] <- stats_df[stats_df$Day == (day - 1), "Accumulative_Revenue"] + stats_df[stats_df$Day == day, "Revenue"]
   }
   # Return stats_df
@@ -610,6 +603,26 @@ MaxroundModal<-function(failed=FALSE){
     )
   )
 }
+
+ConfirmStartModal<-function(round){
+  modalDialog(
+    div(tags$b(paste0('Round ',round,' would start automatically after purchasing these ingredients. Are you ready?'))),
+    footer = tagList(
+      modalButton('Cancel'),
+      actionButton('confirm','Yes')
+    )
+  )
+}
+
+NegativeInvenModal<-function(){
+  modalDialog(
+    div(tags$b('OOOPS! It seems you have negative inventory. Order again.')),
+    footer = tagList(
+      modalButton('OK')
+    )
+  )
+}
+
 #----------------------------testing initialization-------------------------------------------
 MAXROUND<-2
 Initial_cash_on_hand<-20000
