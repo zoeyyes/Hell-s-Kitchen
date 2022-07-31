@@ -80,7 +80,7 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     # Calculate ingredients consumed based on Cai Fan Set A demand
     rice_consumed <- 1 * max_no_mixed_veg_rice_set_A
     # Update each day's stats based on ingredients consumed
-    stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == (day - 1), "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
+    stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == (day - 1), "Rice"] - rice_consumed
     
     pork_consumed <- 1 * max_no_mixed_veg_rice_set_A
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == (day - 1), "Pork"] - pork_consumed
