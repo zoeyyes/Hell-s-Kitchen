@@ -283,8 +283,15 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$oldpasswordok,{
-    if ((str_length(input$password1) >0) && (input$currentPassword == vals$password)){
+    
+    print(paste0('entered',input$currentPassword))
+    print(paste0('correct',vals$password))
+    print('checking now')
+    checked<-(input$currentPassword == vals$password)
+    print(checked)
+    if (input$currentPassword==vals$password){
       #removeModal()
+      print('True alr')
       showModal(UpdatePasswordModal(failed = FALSE))
     } else {
       showModal(reEnterPasswordModal(failed = TRUE,vals$playername))
@@ -477,7 +484,7 @@ server <- function(input, output, session) {
     
   })
   
-  #-----------------------------------leaderboard---------------------------------------------  
+  #-----------------------------------leaderboard( tbd )---------------------------------------------  
   # to be editted
   output$leaderboard <- renderTable({numclicks <- input$publishscore +input$start #to force a refresh whenever one of these buttons is clicked
   leaderboard <- getLeaderBoard(vals$gamevariantid)
