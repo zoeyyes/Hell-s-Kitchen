@@ -1,8 +1,8 @@
-# source('helper_functions.R')
+# testing my stuff
+source('helper_functions2.R')
 library(shiny)
 library(shinyjs)
 library(shinydashboard)
-library(jsonlite)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Hell's Kitchen"),
@@ -10,7 +10,6 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Welcome", tabName = "welcome", icon = icon("door-open")),
       menuItem("Game", tabName = "game", icon = icon("chess-board")),
-      menuItem("Analysis", tabName = "analysis", icon = icon("line-chart")),
       menuItem("Scores", tabName = "scores", icon = icon("cash-register"))
     )),
   
@@ -142,13 +141,6 @@ ui <- dashboardPage(
                        tabPanel('Inventory',plotOutput("Inventoryplot"))))
       ),
       
-      # Analysis tab content
-      tabItem(tabName = 'analysis',
-              h2('Weekly analysis'),
-              tableOutput("analysis"),
-              tableOutput("dishes")
-              ),
-      
       tabItem(tabName = 'scores',
               h2('Leaderboard'),
               fluidRow(
@@ -179,32 +171,28 @@ server <- function(input, output, session) {
                               Total_storage_used = c(rep(0, MAXROUND*7+1)),
                               Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, MAXROUND*7+1)),
                               Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, MAXROUND*7+1)),
+                              Japanese_Bowl_A_Sold = c(rep(0, MAXROUND*7+1)),
+                              Japanese_Bowl_B_Sold = c(rep(0, MAXROUND*7+1)),
+                              Ultimate_Bowl_Sold = c(rep(0, MAXROUND*7+1)),
                               Revenue = c(rep(0, MAXROUND*7+1)),
                               Accumulative_Revenue = c(rep(0, MAXROUND*7+1)),
                               Ordering_cost = c(rep(0, MAXROUND*7+1)),
                               Cash_on_hand = c(rep(0, MAXROUND*7+1)))
   
+  initial_demand <- data.frame(Day = c(seq(1, MAXROUND*7)),
+                               Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
+                               Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)),
+                               Japanese_Bowl_A = c(rep(0, MAXROUND*7)),
+                               Japanese_Bowl_B = c(rep(0, MAXROUND*7)),
+                               Ultimate_Bowl = c(rep(0, MAXROUND*7)))
   
-  initial_demand<- data.frame(Day = c(seq(1, MAXROUND*7)),
-                              Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
-                              Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
-  initial_analysis <- data.frame(Week = c (seq(1,5)),
-                                 Rice_Sold = c(rep(0, 5)),
-                                 Pork_Sold = c(rep(0, 5)),
-                                 Vegetables_Sold = c(rep(0, 5)),
-                                 Noodles_Sold = c(rep(0, 5)),
-                                 Chicken_Sold = c(rep(0, 5)))
-  
-  initial_dishes <-data.frame(Week = c (seq(1,5)),
-                              Set_A_Demand = c(rep(0, 5)),
-                              Set_A_Sold = c(rep(0, 5)),
-                              Set_A_Lost = c(rep(0, 5)),
-                              Set_B_Demand = c(rep(0, 5)),
-                              Set_B_Sold = c(rep(0, 5)),
-                              Set_B_Lost = c(rep(0, 5)))
-  
-  
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,round=1,stats=initial_stats,demand=initial_demand,orderplan=initial_orderplan,weekly_plan=initial_analysis,dishes=initial_dishes)
+  vals <- reactiveValues(password = NULL,
+                         playerid = NULL,
+                         playername = NULL,
+                         round = 1,
+                         stats = initial_stats,
+                         demand = initial_demand,
+                         orderplan = initial_orderplan)
   
   
   #------------------------log in---------------------------------------------------------  
@@ -430,20 +418,6 @@ server <- function(input, output, session) {
             xlab("Day")+ylab("Demand")
         })
         print("plot3")
-        week<-vals$round
-        View(vals$weekly_plan)
-        View(vals$weekly_plan)
-        vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_A)-vals$dishes[vals$dishes$Week==week-1,"Set_A_Demand"]
-        vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_A)-vals$dishes[vals$dishes$Week==week-1,"Set_A_Sold"]
-        vals$dishes[vals$dishes$Week==week,"Set_A_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
-        vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_B)-vals$dishes[vals$dishes$Week==week-1,"Set_B_Demand"]
-        vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_B)-vals$dishes[vals$dishes$Week==week-1,"Set_B_Sold"]
-        vals$dishes[vals$dishes$Week==week,"Set_B_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Rice_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Pork_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]*2+vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
-        vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]*2
         vals$round <- vals$round+1
       }else{
         showModal(warningModel())
@@ -507,24 +481,11 @@ server <- function(input, output, session) {
           xlab("Day")+ylab("Demand")
         
       })
-      week<-vals$round
-      vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_A)
-      vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_A)
-      vals$dishes[vals$dishes$Week==week,"Set_A_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
-      vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_B)
-      vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_B)
-      vals$dishes[vals$dishes$Week==week,"Set_B_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Rice_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Pork_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]*2+vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
-      vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]*2
       
       vals$round <- vals$round+1
       
     }}
-    output$analysis <- renderTable(head(vals$weekly_plan))
-    output$dishes <- renderTable(head(vals$dishes))
+    
     updateNumericInput(session,'pork',value = 0)
     updateNumericInput(session,'chicken',value = 0)
     updateNumericInput(session,'noodles',value = 0)

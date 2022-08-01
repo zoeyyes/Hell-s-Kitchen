@@ -1,5 +1,5 @@
 # At the beginning of any R session, record your AWS database password:
-# source("setAWSPassword.R")
+source("setAWSPassword.R")
 
 source("usePackages.R")
 loadPkgs(c("shiny","DBI","stringr"))
