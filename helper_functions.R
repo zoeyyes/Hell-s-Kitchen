@@ -348,27 +348,28 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
                                                (stats_df[stats_df$Day ==(day-1), "Vegetables"]) / 2,
                                                demand_df[demand_df$Day == day, 'Mixed_Vegetable_Rice_Set_A'] # If there is an excess of ingredients, max_no == demand for the day
       )
-      )
-      print("2")
-      if (max_no_mixed_veg_rice_set_A<0){max_no_mixed_veg_rice_set_A<-0}
-      print('set A max sold')
-      print(max_no_mixed_veg_rice_set_A)
+      )}
+    print("2")
+    if (max_no_mixed_veg_rice_set_A<0){max_no_mixed_veg_rice_set_A<-0}
+    print('set A max sold')
+    print(max_no_mixed_veg_rice_set_A)
       # Store the number of dishes sold in stats (to be retrieved later for calculate_revenues())
-      stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] <- max_no_mixed_veg_rice_set_A
+    stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] <- max_no_mixed_veg_rice_set_A
       
       # Calculate ingredients consumed based on Cai Fan Set A demand
-      rice_consumed <- 1 * max_no_mixed_veg_rice_set_A
+    rice_consumed <- 1 * max_no_mixed_veg_rice_set_A
+    print(rice_consumed)
       # Update each day's stats based on ingredients consumed
-      stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == (day-1), "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
+    stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == (day-1), "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
       
-      pork_consumed <- 1 * max_no_mixed_veg_rice_set_A
-      stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == (day-1), "Pork"] - pork_consumed
+    pork_consumed <- 1 * max_no_mixed_veg_rice_set_A
+    stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == (day-1), "Pork"] - pork_consumed
       
-      vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_A
-      print(vegetables_consumed)
-      stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day ==(day-1), "Vegetables"] - vegetables_consumed
+    vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_A
+    print(vegetables_consumed)
+    stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day ==(day-1), "Vegetables"] - vegetables_consumed
       
-    }
+    
     
   }
   # Return updated stats_df
