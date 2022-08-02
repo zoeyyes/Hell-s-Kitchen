@@ -465,10 +465,11 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Noodles"] <- stats_df[stats_df$Day == day, "Noodles"] - noodles_consumed
     
     pork_consumed <- 3 * max_no_ultimate_bowl_sold
+    print(pork_consumed)
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
     chicken_consumed <- 3 * max_no_ultimate_bowl_sold
-    stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - chicken_consumed
+    stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Chicken"] - chicken_consumed
     
     vegetables_consumed <- 2 * max_no_ultimate_bowl_sold
     stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == day, "Vegetables"] - vegetables_consumed
@@ -490,6 +491,7 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == day, "Rice"] - rice_consumed
     
     pork_consumed <- 2 * max_no_jap_bowl_B_sold
+    print(pork_consumed)
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
     vegetables_consumed <- 2 * max_no_jap_bowl_B_sold
@@ -515,8 +517,8 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Chicken"] <- stats_df[stats_df$Day == day, "Chicken"] - chicken_consumed
     
     pork_consumed <- max_no_jap_bowl_A_sold
+    print(pork_consumed)
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
-    
     
     # Priority 4: Sell Cai Fan Set B
     # Find the max number of Cai Fan Set B that can be sold.
@@ -534,18 +536,18 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     # Update each day's stats based on ingredients consumed
     stats_df[stats_df$Day == day, "Noodles"] <- stats_df[stats_df$Day == day, "Noodles"] - noodles_consumed 
     
-    chicken_consumed <- 1 * max_no_mixed_veg_rice_set_B
+    chicken_consumed <- 2 * max_no_mixed_veg_rice_set_B
     stats_df[stats_df$Day == day, "Chicken"] <- stats_df[stats_df$Day == day, "Chicken"] - chicken_consumed
     
-    vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_B
+    vegetables_consumed <- 1 * max_no_mixed_veg_rice_set_B
     stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == day, "Vegetables"] - vegetables_consumed
     
     
     # Priority 5: Sell Cai Fan Set A
     # Find the max number of Cai Fan Set A that can be sold.
-    max_no_mixed_veg_rice_set_A <- floor(min(stats_df[stats_df$Day == (day - 1), "Rice"],
-                                             stats_df[stats_df$Day == (day - 1), "Pork"],
-                                             stats_df[stats_df$Day == (day - 1), "Vegetables"] / 2,
+    max_no_mixed_veg_rice_set_A <- floor(min(stats_df[stats_df$Day == day, "Rice"],
+                                             stats_df[stats_df$Day == day, "Pork"],
+                                             stats_df[stats_df$Day == day, "Vegetables"] / 2,
                                              demand_df[demand_df$Day == day, 'Mixed_Vegetable_Rice_Set_A'] # If there is an excess of ingredients, max_no == demand for the day
                                              )
                                          )
@@ -555,13 +557,14 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     # Calculate ingredients consumed based on Cai Fan Set A demand
     rice_consumed <- 1 * max_no_mixed_veg_rice_set_A
     # Update each day's stats based on ingredients consumed
-    stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == (day - 1), "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
+    stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == day, "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
     
     pork_consumed <- 1 * max_no_mixed_veg_rice_set_A
-    stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == (day - 1), "Pork"] - pork_consumed
+    print(pork_consumed)
+    stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
     vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_A
-    stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == (day - 1), "Vegetables"] - vegetables_consumed
+    stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == day, "Vegetables"] - vegetables_consumed
     
     
     # At the end of each day, update Total_storage_used column
