@@ -575,13 +575,14 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
 # Robin: Can consider merging this function with calculate_consumption().
 calculate_revenue <- function (round_number, stats_df) {
   
+  # Set the price of each dish
+  caifan_A_price <- 5
+  caifan_B_price <- 6.5
+  jap_bowl_A_price <- 10
+  jap_bowl_B_price <- 12
+  ultimate_bowl_price <- 15
+  
   for (day in (7*round_number-6):(7*round_number)){
-    # Set the price of each dish
-    caifan_A_price <- 5
-    caifan_B_price <- 6.5
-    jap_bowl_A_price <- 10
-    jap_bowl_B_price <- 12
-    ultimate_bowl_price <- 15
     stats_df[stats_df$Day == day, "Revenue"] <- (stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price +
                                                    stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price +
                                                    stats_df[stats_df$Day == day, "Japanese_Bowl_A_Sold"] * jap_bowl_A_price +
