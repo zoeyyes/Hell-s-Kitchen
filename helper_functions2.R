@@ -465,11 +465,10 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Noodles"] <- stats_df[stats_df$Day == day, "Noodles"] - noodles_consumed
     
     pork_consumed <- 3 * max_no_ultimate_bowl_sold
-    print(pork_consumed)
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
     chicken_consumed <- 3 * max_no_ultimate_bowl_sold
-    stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Chicken"] - chicken_consumed
+    stats_df[stats_df$Day == day, "Chicken"] <- stats_df[stats_df$Day == day, "Chicken"] - chicken_consumed
     
     vegetables_consumed <- 2 * max_no_ultimate_bowl_sold
     stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == day, "Vegetables"] - vegetables_consumed
@@ -491,7 +490,6 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == day, "Rice"] - rice_consumed
     
     pork_consumed <- 2 * max_no_jap_bowl_B_sold
-    print(pork_consumed)
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
     vegetables_consumed <- 2 * max_no_jap_bowl_B_sold
@@ -517,7 +515,6 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Chicken"] <- stats_df[stats_df$Day == day, "Chicken"] - chicken_consumed
     
     pork_consumed <- max_no_jap_bowl_A_sold
-    print(pork_consumed)
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
     # Priority 4: Sell Cai Fan Set B
@@ -560,7 +557,6 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
     stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == day, "Rice"] - rice_consumed # max(0, __) is to stop ingredient level from going below 0.
     
     pork_consumed <- 1 * max_no_mixed_veg_rice_set_A
-    print(pork_consumed)
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == day, "Pork"] - pork_consumed
     
     vegetables_consumed <- 2 * max_no_mixed_veg_rice_set_A

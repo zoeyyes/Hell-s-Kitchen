@@ -494,8 +494,6 @@ server <- function(input, output, session) {
         
         print("plot3")
         week<-vals$round
-        View(vals$weekly_plan)
-        View(vals$weekly_plan)
         vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]<-sum(vals$demand$Mixed_Vegetable_Rice_Set_A)-sum(vals$dishes$Set_A_Demand)
         vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]<-sum(vals$stats$Mixed_Vegetable_Rice_Set_A_Sold)-sum(vals$dishes$Set_A_Sold)
         vals$dishes[vals$dishes$Week==week,"Set_A_Lost"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Demand"]-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]
@@ -516,6 +514,7 @@ server <- function(input, output, session) {
         vals$rest[vals$rest$Week==week,"UltiSet_Demand"]<-sum(vals$demand$Ultimate_Bowl)
         vals$rest[vals$rest$Week==week,"UltiSet_Sold"]<-sum(vals$stats$Ultimate_Bowl_Sold)
         vals$rest[vals$rest$Week==week,"UltiSet_Lost"]<-vals$rest[vals$rest$Week==week,"UltiSet_Demand"]-vals$rest[vals$rest$Week==week,"UltiSet_Sold"]
+       
         vals$round <- vals$round+1
         vals$nu<-vals$nu+7
       }else{
