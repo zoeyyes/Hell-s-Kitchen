@@ -1,4 +1,4 @@
-source('helper_functions.R')
+source('helper_functions2.R')
 library(shiny)
 library(shinyjs)
 library(shinydashboard)
@@ -144,7 +144,7 @@ ui <- dashboardPage(
       
       # Analysis tab content
       tabItem(tabName = 'analysis',
-              h2('Weekly analysis'),
+              h2('Weekly Summary'),
               tableOutput("analysis"),
               tableOutput("dishes")
               ),
@@ -166,6 +166,7 @@ server <- function(input, output, session) {
   
   MAXROUND<-5
   Initial_cash_on_hand<-20000
+  Inventory_limit<-5000
   
   initial_orderplan<-data.frame(matrix(ncol = 5, nrow = MAXROUND))
   colnames(initial_orderplan)<-c('chicken', 'pork', 'noodles', 'rice', 'vegetables')
@@ -179,6 +180,9 @@ server <- function(input, output, session) {
                               Total_storage_used = c(rep(0, MAXROUND*7+1)),
                               Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, MAXROUND*7+1)),
                               Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, MAXROUND*7+1)),
+                              Japanese_Bowl_A_Sold=c(rep(0, MAXROUND*7+1)),
+                              Japanese_Bowl_B_Sold=c(rep(0, MAXROUND*7+1)),
+                              Ultimate_Bowl_Sold=c(rep(0, MAXROUND*7+1)),
                               Revenue = c(rep(0, MAXROUND*7+1)),
                               Accumulative_Revenue = c(rep(0, MAXROUND*7+1)),
                               Ordering_cost = c(rep(0, MAXROUND*7+1)),
@@ -187,7 +191,11 @@ server <- function(input, output, session) {
   
   initial_demand<- data.frame(Day = c(seq(1, MAXROUND*7)),
                               Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
-                              Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
+                              Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)),
+                              Japanese_Bowl_A=c(rep(0, MAXROUND*7)),
+                              Japanese_Bowl_B=c(rep(0, MAXROUND*7)),
+                              Ultimate_Bowl=c(rep(0, MAXROUND*7)))
+  
   initial_analysis <- data.frame(Week = c (seq(1,5)),
                                  Rice_Sold = c(rep(0, 5)),
                                  Pork_Sold = c(rep(0, 5)),
@@ -372,11 +380,14 @@ server <- function(input, output, session) {
     showModal(ConfirmStartModal(vals$round))
   })
   
+  
   observeEvent(input$confirm, {
     
     removeModal()
     
-    if(vals$orderplan$chicken[vals$round]<0 | vals$orderplan$pork[vals$round]<0 | vals$orderplan$rice[vals$round]<0 | vals$orderplan$noodles[vals$round]<0 | vals$orderplan$vegetables[vals$round]<0){
+    if(vals$orderplan$chicken[vals$round]+vals$orderplan$pork[vals$round]+vals$orderplan$rice[vals$round]+vals$orderplan$noodles[vals$round]+vals$orderplan$vegetables[vals$round]>Inventory_limit){
+      showModal(ExceedCapacityModal())
+    }else if(vals$orderplan$chicken[vals$round]<0 | vals$orderplan$pork[vals$round]<0 | vals$orderplan$rice[vals$round]<0 | vals$orderplan$noodles[vals$round]<0 | vals$orderplan$vegetables[vals$round]<0){
       showModal(NegativeInvenModal())
     }else{
     
@@ -413,6 +424,7 @@ server <- function(input, output, session) {
             labs(x="Day",y="Cash on hand",title = "Cash on hand VS Day")
         })
         print("plot1")
+        
         output$Inventoryplot <- renderPlot({
           ggplot(vals$stats[0:row_num,])+
             geom_line(aes(x=Day,y=Pork,color="Pork"))+
@@ -423,12 +435,41 @@ server <- function(input, output, session) {
             xlab("Day")+ylab("Inventory")
         })
         print("plot2")
-        output$Demandplot <- renderPlot({
+        
+        if(vals$round==2){output$Demandplot <- renderPlot({
           ggplot(vals$demand[0:row_num,])+
             geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='Mixed_Vegetable_Rice_Set_A'))+
             geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='Mixed_Vegetable_Rice_Set_B'))+
             xlab("Day")+ylab("Demand")
-        })
+        })}
+        
+        if(vals$round==3){output$Demandplot <- renderPlot({
+          ggplot(vals$demand[0:row_num,])+
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='Mixed_Vegetable_Rice_Set_A'))+
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='Mixed_Vegetable_Rice_Set_B'))+
+            geom_line(aes(x=Day,y=Japanese_Bowl_A,color='Japanese_Bowl_A'))+
+            xlab("Day")+ylab("Demand")
+        })}
+        
+        if(vals$round==4){output$Demandplot <- renderPlot({
+          ggplot(vals$demand[0:row_num,])+
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='Mixed_Vegetable_Rice_Set_A'))+
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='Mixed_Vegetable_Rice_Set_B'))+
+            geom_line(aes(x=Day,y=Japanese_Bowl_A,color='Japanese_Bowl_A'))+
+            geom_line(aes(x=Day,y=Japanese_Bowl_B,color='Japanese_Bowl_B'))+
+            xlab("Day")+ylab("Demand")
+        })}
+        
+        if(vals$round==5){output$Demandplot <- renderPlot({
+          ggplot(vals$demand[0:row_num,])+
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_A,color='Mixed_Vegetable_Rice_Set_A'))+
+            geom_line(aes(x=Day,y=Mixed_Vegetable_Rice_Set_B,color='Mixed_Vegetable_Rice_Set_B'))+
+            geom_line(aes(x=Day,y=Japanese_Bowl_A,color='Japanese_Bowl_A'))+
+            geom_line(aes(x=Day,y=Japanese_Bowl_B,color='Japanese_Bowl_B'))+
+            geom_line(aes(x=Day,y=Ultimate_Bowl,color='Ultimate_Bowl'))+
+            xlab("Day")+ylab("Demand")
+        })}
+        
         print("plot3")
         week<-vals$round
         View(vals$weekly_plan)

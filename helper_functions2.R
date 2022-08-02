@@ -6,15 +6,20 @@ library(Matrix)
 library(broom.mixed)
 
 #----------------------------login-------------------------------------------
-passwordModal <- function(failed = FALSE) {
+passwordModal <- function(failed = FALSE,duplicated=FALSE,password_wrong=FALSE) {
   modalDialog(
     title = 'Sign up',
     textInput('playername','Enter your unique username:'),
     passwordInput("password1", "Enter a new password:"),
     passwordInput("password2", "Confirm by re-entering the new password:"),
     "If successful, you will log in with this username and password.",
-    if (failed)
-      div(tags$b("Registration failed. Try again.", style = "color: red;")),
+    if (failed){
+      if(duplicated){
+        div(tags$b("This username has already existed. Select another one.", style = "color: red;"))
+      }else{
+        div(tags$b("You entered different passwords. Try again.", style = "color: red;"))
+      }
+    },
     
     footer = tagList(
       modalButton("Cancel"),
@@ -26,7 +31,7 @@ passwordModal <- function(failed = FALSE) {
 warningModel <- function(){
   modalDialog(
     title='WARNING',
-    "Your order cost is more than your cash_on_hand,please renter your inventory",
+    "Your order cost is more than your cash-on-hand,please renter your inventory",
     footer = tagList(
       modalButton('OK')
     )
@@ -74,7 +79,7 @@ acknowledgeModel<-function(){
 loginModal <- function(failed = FALSE) {
   modalDialog(
     title = "Login",
-    textInput("playername", "Enter your Playername", "ABC"),
+    textInput("playername", "Enter your Playername"),
     passwordInput("password3", "Enter your password:"),
     if (failed)
       div(tags$b("There is no registered player with that name and password. Try again or re-register.", style = "color: red;")),
@@ -145,30 +150,26 @@ registerPlayer <- function(playername,password){
   query <- createNewPlayerQuery(conn,playername,password)
   # This query could fail to run properly so we wrap it in a loop with tryCatch()
   success <- FALSE
-  iter <- 0
-  MAXITER <- 5
-  while(!success & iter < MAXITER){
-    iter <- iter+1
-    tryCatch(
-      {  # This is not a SELECT query so we use dbExecute
-        result <- dbExecute(conn,query)
-        success <- TRUE
-      }, error=function(cond){print("registerPlayer: ERROR")
-        print(cond)
-        # The query failed, likely because of a duplicate playername
-        query <- createNewPlayerQuery(conn,playername,password) }, 
-      
-      warning=function(cond){print("registerPlayer: WARNING")
-        print(cond)},
-      finally = {print(paste0("Iteration ",iter," done."))
-      }
-    )
-  } # end while loop
-  # This may not have been successful
-  if (!success) playername = NULL
+  
+  tryCatch(
+    {  # This is not a SELECT query so we use dbExecute
+      result <- dbExecute(conn,query)
+      success <- TRUE 
+    }, error=function(cond){print("registerPlayer: ERROR")
+      print(cond)
+      # The query failed, likely because of either two passwords do not match or a duplicate username
+    }, 
+    
+    warning=function(cond){print("registerPlayer: WARNING")
+      print(cond)},
+    finally = { print(paste0("check done")) }
+  )
+  
   #Close the connection
   dbDisconnect(conn)
-  playername
+  print('result')
+  print(success)
+  success
 }
 
 publishScore <- function(playerid,score){
@@ -205,6 +206,7 @@ getLeaderBoard <- function(){
   result
 }
 
+
 #----------------------------game----------------------------------------------
 
 generate_random_demand <- function(round_number, demand_df) {
@@ -234,7 +236,7 @@ generate_random_demand <- function(round_number, demand_df) {
       while (japanese_bowl_A <= 0) {
         japanese_bowl_A <- round(rnorm(1, mean = 55, sd = 10))
       }
-      demand_df[demand_df$Day == day, 'japanese_bowl_A'] = japanese_bowl_A
+      demand_df[demand_df$Day == day, 'Japanese_Bowl_A'] = japanese_bowl_A
     }
     
     # Generate demand for Dish 4: Japanese Bowl B. Only appears from Round 4 onwards.
@@ -243,7 +245,7 @@ generate_random_demand <- function(round_number, demand_df) {
       while (japanese_bowl_B <= 0) {
         japanese_bowl_B <- round(rnorm(1, mean = 55, sd = 5))
       }
-      demand_df[demand_df$Day == day, 'japanese_bowl_B'] = japanese_bowl_B
+      demand_df[demand_df$Day == day, 'Japanese_Bowl_B'] = japanese_bowl_B
     }
     
     # Generate demand for Dish 4: Ultimate Meal. Only appears in Round 5.
@@ -252,7 +254,7 @@ generate_random_demand <- function(round_number, demand_df) {
       while (ultimate_bowl <= 0) {
         ultimate_bowl <- round(rnorm(1, mean = 50, sd = 10))
       }
-      demand_df[demand_df$Day == day, 'ultimate_bowl'] = ultimate_bowl
+      demand_df[demand_df$Day == day, 'Ultimate_Bowl'] = ultimate_bowl
     }
     
   }
@@ -283,7 +285,7 @@ generate_random_demand <- function(round_number, demand_df) {
       while (japanese_bowl_A <= 0) {
         japanese_bowl_A <- round(rnorm(1, mean = 90, sd = 10))
       }
-      demand_df[demand_df$Day == day, 'japanese_bowl_A'] = japanese_bowl_A
+      demand_df[demand_df$Day == day, 'Japanese_Bowl_A'] = japanese_bowl_A
     }
     
     # Generate demand for Dish 4: Japanese Bowl B. Only appears from Round 4 onwards.
@@ -292,7 +294,7 @@ generate_random_demand <- function(round_number, demand_df) {
       while (japanese_bowl_B <= 0) {
         japanese_bowl_B <- round(rnorm(1, mean = 95, sd = 5))
       }
-      demand_df[demand_df$Day == day, 'japanese_bowl_B'] = japanese_bowl_B
+      demand_df[demand_df$Day == day, 'Japanese_Bowl_B'] = japanese_bowl_B
     }
     
     # Generate demand for Dish 4: Ultimate Meal. Only appears in Round 5.
@@ -301,7 +303,7 @@ generate_random_demand <- function(round_number, demand_df) {
       while (ultimate_bowl <= 0) {
         ultimate_bowl <- round(rnorm(1, mean = 100, sd = 10))
       }
-      demand_df[demand_df$Day == day, 'ultimate_bowl'] = ultimate_bowl
+      demand_df[demand_df$Day == day, 'Ultimate_Bowl'] = ultimate_bowl
     }
     
   }
@@ -348,6 +350,7 @@ update_storage_used<-function(round,orderplan,stats){
     stats[stats$Day==(purchase_day-1),'Noodles']<-stats[stats$Day==(purchase_day-1),'Noodles']+orderplan[round,'noodles']
     stats[stats$Day==(purchase_day-1),'Vegetables']<-stats[stats$Day==(purchase_day-1),'Vegetables']+orderplan[round,'vegetables']
     stats[stats$Day==(purchase_day-1),'Rice']<-stats[stats$Day==(purchase_day-1),'Rice']+orderplan[round,'rice']
+    stats[stats$Day==(purchase_day-1),'Total_storage_used']<-stats[stats$Day == (purchase_day-1), "Rice"] + stats[stats$Day ==(purchase_day-1), "Pork"] + stats[stats$Day == (purchase_day-1), "Vegetables"] + stats[stats$Day == (purchase_day-1), "Noodles"] + stats[stats$Day == (purchase_day-1), "Chicken"]
     stats
   }
   
@@ -434,13 +437,13 @@ update_storage_used<-function(round,orderplan,stats){
 
 calculate_consumption <- function(round_number, stats_df, demand_df) {
   
-  for (day in (7 * round_number - 6):(7 * round_number - 1)) {
+  for (day in (7 * round_number - 6):(7 * round_number)) {
     
     # Set the previous day's inventory levels as the current day's inventory levels.
     stats_df[stats_df$Day == day, "Rice"] <- stats_df[stats_df$Day == (day - 1), "Rice"]
     stats_df[stats_df$Day == day, "Chicken"] <- stats_df[stats_df$Day == (day - 1), "Chicken"]
     stats_df[stats_df$Day == day, "Pork"] <- stats_df[stats_df$Day == (day - 1), "Pork"]
-    stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == day, "Vegetables"]
+    stats_df[stats_df$Day == day, "Vegetables"] <- stats_df[stats_df$Day == (day-1), "Vegetables"]
     stats_df[stats_df$Day == day, "Noodles"] <- stats_df[stats_df$Day == (day - 1), "Noodles"]
     # For each working day, deduct from the current day's inventory levels.
     # Always check the max no. of the dish you can sell after selling as much of the previous dish possible.
@@ -632,8 +635,17 @@ NegativeInvenModal<-function(){
   )
 }
 
+ExceedCapacityModal<-function(){
+  modalDialog(
+    div(tags$b('The refrigerator cannot store so many ingredients. Order again.')),
+    footer = tagList(
+      modalButton('OK')
+    )
+  )
+}
+
 #----------------------------testing initialization-------------------------------------------
-MAXROUND<-2
+MAXROUND<-5
 Initial_cash_on_hand<-20000
 
 orderplan<-data.frame(matrix(ncol = 5, nrow = 0))
@@ -649,6 +661,9 @@ stats_test_df <- data.frame(Day = c(seq(0, MAXROUND*7)),
                             Total_storage_used = c(rep(0, MAXROUND*7+1)),
                             Mixed_Vegetable_Rice_Set_A_Sold = c(rep(0, MAXROUND*7+1)),
                             Mixed_Vegetable_Rice_Set_B_Sold = c(rep(0, MAXROUND*7+1)),
+                            Japanese_Bowl_A_Sold=c(rep(0, MAXROUND*7+1)),
+                            Japanese_Bowl_B_Sold=c(rep(0, MAXROUND*7+1)),
+                            Ultimate_Bowl_Sold=c(rep(0, MAXROUND*7+1)),
                             Revenue = c(rep(0, MAXROUND*7+1)),
                             Accumulative_Revenue = c(rep(0, MAXROUND*7+1)),
                             Ordering_cost = c(rep(0, MAXROUND*7+1)),
@@ -656,13 +671,16 @@ stats_test_df <- data.frame(Day = c(seq(0, MAXROUND*7)),
 
 demand_test_df <- data.frame(Day = c(seq(1, MAXROUND*7)),
                              Mixed_Vegetable_Rice_Set_A = c(rep(0, MAXROUND*7)),
-                             Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)))
+                             Mixed_Vegetable_Rice_Set_B = c(rep(0, MAXROUND*7)),
+                             Japanese_Bowl_A=c(rep(0, MAXROUND*7)),
+                             Japanese_Bowl_B=c(rep(0, MAXROUND*7)),
+                             Ultimate_Bowl=c(rep(0, MAXROUND*7)))
 
 #----------------------------testing start (round1)-------------------------------------------
 round<-1
 
 #order 1st round
-orderplan<-form_orderplan_df(orderplan,500,500,500,200,200)
+orderplan<-form_orderplan_df(orderplan,500,500,500,200,600)
 
 stats_test_df[stats_test_df$Day==0,"Total_storage_used"]<-sum(orderplan[1,])
 stats_test_df[stats_test_df$Day==0,"Cash_on_hand"]<-Initial_cash_on_hand
@@ -687,7 +705,22 @@ stats_test_df <- calculate_cash_on_hand(round,stats_test_df)
 
 #----------------------------testing start (round2)-------------------------------------------
 round<-round+1
-orderplan<-form_orderplan_df(orderplan,500,500,500,200,500)
+orderplan<-form_orderplan_df(orderplan,500,500,500,200,600)
+
+stats_test_df<-update_storage_used(round,orderplan,stats_test_df)
+
+demand_test_df <- generate_random_demand(round, demand_test_df)
+
+stats_test_df <- calculate_orderingcost(round,orderplan,stats_test_df)
+
+stats_test_df <- calculate_consumption(round, stats_test_df, demand_test_df)
+
+stats_test_df <- calculate_revenue(round, stats_test_df)
+
+stats_test_df <- calculate_cash_on_hand(round,stats_test_df)
+#----------------------------testing start (round3)-------------------------------------------
+round<-round+1
+orderplan<-form_orderplan_df(orderplan,600,500,500,200,600)
 
 stats_test_df<-update_storage_used(round,orderplan,stats_test_df)
 
@@ -701,3 +734,34 @@ stats_test_df <- calculate_revenue(round, stats_test_df)
 
 stats_test_df <- calculate_cash_on_hand(round,stats_test_df)
 
+#----------------------------testing start (round4)-------------------------------------------
+round<-round+1
+orderplan<-form_orderplan_df(orderplan,600,500,500,600,600)
+
+stats_test_df<-update_storage_used(round,orderplan,stats_test_df)
+
+demand_test_df <- generate_random_demand(round, demand_test_df)
+
+stats_test_df <- calculate_orderingcost(round,orderplan,stats_test_df)
+
+stats_test_df <- calculate_consumption(round, stats_test_df, demand_test_df)
+
+stats_test_df <- calculate_revenue(round, stats_test_df)
+
+stats_test_df <- calculate_cash_on_hand(round,stats_test_df)
+
+#----------------------------testing start (round5)-------------------------------------------
+round<-round+1
+orderplan<-form_orderplan_df(orderplan,600,0,500,600,600)
+
+stats_test_df<-update_storage_used(round,orderplan,stats_test_df)
+
+demand_test_df <- generate_random_demand(round, demand_test_df)
+
+stats_test_df <- calculate_orderingcost(round,orderplan,stats_test_df)
+
+stats_test_df <- calculate_consumption(round, stats_test_df, demand_test_df)
+
+stats_test_df <- calculate_revenue(round, stats_test_df)
+
+stats_test_df <- calculate_cash_on_hand(round,stats_test_df)
