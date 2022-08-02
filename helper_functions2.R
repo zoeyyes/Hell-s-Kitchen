@@ -579,12 +579,20 @@ calculate_revenue <- function (round_number, stats_df) {
     # Set the price of each dish
     caifan_A_price <- 5
     caifan_B_price <- 6.5
-    stats_df[stats_df$Day == day, "Revenue"] <- stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price + stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price
+    jap_bowl_A_price <- 10
+    jap_bowl_B_price <- 12
+    ultimate_bowl_price <- 15
+    stats_df[stats_df$Day == day, "Revenue"] <- (stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price +
+                                                   stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_B_Sold"] * caifan_B_price +
+                                                   stats_df[stats_df$Day == day, "Japanese_Bowl_A_Sold"] * jap_bowl_A_price +
+                                                   stats_df[stats_df$Day == day, "Japanese_Bowl_B_Sold"] * jap_bowl_B_price +
+                                                   stats_df[stats_df$Day == day, "Ultimate_Bowl_Sold"] * ultimate_bowl_price)
     stats_df[stats_df$Day == day, "Accumulative_Revenue"] <- stats_df[stats_df$Day == (day - 1), "Accumulative_Revenue"] + stats_df[stats_df$Day == day, "Revenue"]
   }
   # Return stats_df
   stats_df
 }
+
 
 calculate_cash_on_hand<-function(round,stats_df){
   
