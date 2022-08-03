@@ -532,31 +532,34 @@ server <- function(input, output, session) {
           vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]+2*vals$rest[vals$rest$Week==week,"UltiSet_Sold"]
           vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]*2+vals$rest[vals$rest$Week==week,"JSet_A_Sold"]+3*vals$rest[vals$rest$Week==week,"UltiSet_Sold"]
           
+          
            output$round_info<-renderUI(paste0('This is round ',vals$round,'/5. Click on START GAME to start this round.'))
+           
            output$Inventory_space<-renderUI(paste0('Inventory Space: ',vals$stats[vals$round*7-7,'Total_storage_used'],'/',Inventory_limit))
-
+           
            sold<-c(vals$dishes[vals$dishes$Week==week,"Set_A_Sold"],vals$dishes[vals$dishes$Week==week,"Set_B_Sold"],vals$rest[vals$rest$Week==week,"JSet_A_Sold"],vals$rest[vals$rest$Week==week,"JSet_B_Sold"],vals$rest[vals$rest$Week==week,"UltiSet_Sold"])
-
+           
            dish<-c('Mixed Vegetable Rice Set A','Mixed Vegetable Rice Set B','Japanese Bowl A', 'Japanese Bowl B','Ultimate Bowl')
-
+           
            best<-dish[which.max(sold)]
            output$BestSold<-renderUI(paste('The most popular dish in last week is ',best,'.'))
 
            ingredients<-c('Rice','Pork','Noodles','Rice','Vegetables')
+           print('warning here 5')
+           
            for (ingre in ingredients){
               if (vals$stats[7*vals$round-7,ingre]==0){
                  output$safetystock<-renderUI('You have run out some kinds of your ingredients. Please consider safety stock!')
                 }
             }
           
+          print('warning here 5')
           
-           if (vals$round<5){
-            vals$round <- vals$round+1
-            vals$nu<-vals$nu+7
-          }
           if (vals$round==5){
             vals$score<-vals$stats[vals$stats$Day==35,'Cash_on_hand']
           }
+           
+           vals$round <- vals$round+1
         }else{
           showModal(warningModel())
           View(vals$stats)
