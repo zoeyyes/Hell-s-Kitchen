@@ -195,10 +195,9 @@ publishScore <- function(playerid,score){
 
 getLeaderBoard <- function(){
   conn <- getAWSConnection()
-  
   #Assemble the query for this gamevariantid
-  query <- "SELECT Player.Username,Score.score,Score.asoftime  FROM Score INNER JOIN Player"
-  query <- paste0(query," ON (ls.playerid=lp.playerid) ORDER BY ls.score DESC,ls.asoftime ASC")
+  query <- "SELECT Player.Username,Player.id,Score.score,Score.asoftime  FROM Score INNER JOIN Player"
+  query <- paste0(query," ON (Player.id=Score.id) ORDER BY Score.score DESC,Score.asoftime ASC")
   
   print(query) # for debugging
   result <- dbGetQuery(conn,query)
