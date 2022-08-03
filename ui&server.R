@@ -10,7 +10,7 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Welcome", tabName = "welcome", icon = icon("door-open")),
       menuItem("Game", tabName = "game", icon = icon("chess-board")),
-      menuItem("Analysis", tabName = "analysis", icon = icon("line-chart")),
+      menuItem("Summary", tabName = "analysis", icon = icon("line-chart")),
       menuItem("Scores", tabName = "scores", icon = icon("cash-register"))
     )),
   
@@ -109,22 +109,33 @@ ui <- dashboardPage(
       tabItem(tabName = "game",
               fluidRow(
                 column(3,tags$div(id="inputsection"),
+                       
                        numericInput("pork","PORK",0),
-                       h5("current inventory:",textOutput("porknow")),
+                       htmlOutput("porknow"),
+                       tags$br(),
+                       
                        numericInput("chicken","CHICKEN",0),
-                       h5("current inventory:",textOutput("chickennow")),
+                       htmlOutput("chickennow"),
+                       tags$br(),
+                       
                        numericInput("rice","RICE",0),
-                       h5("current inventory:",textOutput("ricenow")),
+                       htmlOutput("ricenow"),
+                       tags$br(),
+                       
                        numericInput("noodles","NOODLES",0),
-                       h5("current inventory:",textOutput("noodlesnow")),
+                       htmlOutput("noodlesnow"),
+                       tags$br(),
+                       
                        numericInput("vegetables","VEGETABLESset",0),
-                       h5("current inventory:",textOutput("vegetablesnow")),
-                       div(style = "color:brown, font-size=500%",align='center', 
-                           'INVENTORY LIMIT: 5000'),
-                       div(align='center',uiOutput('startbutton'))),
+                       htmlOutput("vegetablesnow")),
+              
                 column(9,
                        box(height='450px',width='1050px',status = 'primary',
-                           img(src='Meat.gif',height='420px',width='1030px'))
+                           img(src='Meat.gif',height='420px',width='1030px')),
+                        img(src='Meat.gif',height='420px',width='1030px')),
+              
+                      div(style = "color:brown, font-size=500%",align='center', 'INVENTORY LIMIT: 3000   Initial Cash-on-hand: $10000'),
+                      div(align='center',uiOutput('startbutton'))
                 )
               ),
               uiOutput("moreControls"),
@@ -133,7 +144,14 @@ ui <- dashboardPage(
                 
                 box(
                   title = 'Message Box',solidHeader = TRUE,width =3,height = '320px',
-                  htmlOutput('message')),
+                  htmlOutput('round_info'),
+                  tags$br(),
+                  htmlOutput('Inventory_space'),
+                  tags$br(),
+                  htmlOutput('BestSold'),
+                  tags$br(),
+                  htmlOutput('safetystock')
+                ),
                 box(title = 'Recipes',solidHeader = TRUE,width = 5,status = 'primary',height = '320px',
                     img(src='SetA.png',height='100px',width='180px'),
                     uiOutput("recipe3"),
@@ -173,8 +191,8 @@ server <- function(input, output, session) {
   #------------------------initialize---------------------------------------------------------
   
   MAXROUND<-5
-  Initial_cash_on_hand<-20000
-  Inventory_limit<-5000
+  Initial_cash_on_hand<-10000
+  Inventory_limit<-3000
   
   initial_orderplan<-data.frame(matrix(ncol = 5, nrow = MAXROUND))
   colnames(initial_orderplan)<-c('chicken', 'pork', 'noodles', 'rice', 'vegetables')
@@ -231,13 +249,16 @@ server <- function(input, output, session) {
                             UltiSet_Lost = c(rep(0, 5)))
   
   
-  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,score=NULL,round=1,nu=7,stats=initial_stats,demand=initial_demand,orderplan=initial_orderplan,weekly_plan=initial_analysis,dishes=initial_dishes,rest=initial_rest)
+  vals <- reactiveValues(password = NULL,playerid=NULL,playername=NULL,score=NULL,round=1,stats=initial_stats,demand=initial_demand,orderplan=initial_orderplan,weekly_plan=initial_analysis,dishes=initial_dishes,rest=initial_rest)
   
-  output$porknow <- renderPrint({vals$stats[vals$stats$Day==vals$nu,"Pork"]})
-  output$ricenow <- renderPrint({vals$stats[vals$stats$Day==vals$nu,"Rice"]})
-  output$vegetablesnow <- renderPrint({vals$stats[vals$stats$Day==vals$nu,"Vegetables"]})
-  output$chickennow <- renderPrint({vals$stats[vals$stats$Day==vals$nu,"Chicken"]})
-  output$noodlesnow <- renderPrint({vals$stats[vals$stats$Day==vals$nu,"Noodles"]})
+  output$porknow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==7*vals$round-7,"Pork"]}))
+  output$ricenow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==7*vals$round-7,"Rice"]}))
+  output$vegetablesnow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==7*vals$round-7,"Vegetables"]}))
+  output$chickennow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==7*vals$round-7,"Chicken"]}))
+  output$noodlesnow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==7*vals$round-7,"Noodles"]}))
+  
+  output$round_info<-renderUI('This is round 1. Initially, you have $10000 to operate your restaurant.')
+  output$Inventory_space<-renderUI('Click on START GAME to start this round. ')
   
   #------------------------log in---------------------------------------------------------  
   
@@ -516,7 +537,26 @@ server <- function(input, output, session) {
           vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]*2+vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]+2*vals$rest[vals$rest$Week==week,"JSet_B_Sold"]+2*vals$rest[vals$rest$Week==week,"UltiSet_Sold"]
           vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]+2*vals$rest[vals$rest$Week==week,"UltiSet_Sold"]
           vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]*2+vals$rest[vals$rest$Week==week,"JSet_A_Sold"]+3*vals$rest[vals$rest$Week==week,"UltiSet_Sold"]
-          if (vals$round<5){
+          
+           output$round_info<-renderUI(paste0('This is round ',vals$round,'/5. Click on START GAME to start this round.'))
+           output$Inventory_space<-renderUI(paste0('Inventory Space: ',vals$stats[vals$round*7-7,'Total_storage_used'],'/',Inventory_limit))
+
+           sold<-c(vals$dishes[vals$dishes$Week==week,"Set_A_Sold"],vals$dishes[vals$dishes$Week==week,"Set_B_Sold"],vals$rest[vals$rest$Week==week,"JSet_A_Sold"],vals$rest[vals$rest$Week==week,"JSet_B_Sold"],vals$rest[vals$rest$Week==week,"UltiSet_Sold"])
+
+           dish<-c('Mixed Vegetable Rice Set A','Mixed Vegetable Rice Set B','Japanese Bowl A', 'Japanese Bowl B','Ultimate Bowl')
+
+           best<-dish[which.max(sold)]
+           output$BestSold<-renderUI(paste('The most popular dish in last week is ',best,'.'))
+
+           ingredients<-c('Rice','Pork','Noodles','Rice','Vegetables')
+           for (ingre in ingredients){
+              if (vals$stats[7*vals$round-7,ingre]==0){
+                 output$safetystock<-renderUI('You have run out some kinds of your ingredients. Please consider safety stock!')
+                }
+            }
+          
+          
+           if (vals$round<5){
             vals$round <- vals$round+1
             vals$nu<-vals$nu+7
           }
@@ -597,6 +637,22 @@ server <- function(input, output, session) {
         vals$weekly_plan[vals$weekly_plan$Week==week,"Vegetables_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_A_Sold"]*2+vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
         vals$weekly_plan[vals$weekly_plan$Week==week,"Noodles_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]
         vals$weekly_plan[vals$weekly_plan$Week==week,"Chicken_Sold"]<-vals$dishes[vals$dishes$Week==week,"Set_B_Sold"]*2
+        
+        output$round_info<-renderUI(paste0('This is round 2/5. Click on START GAME to start this round.'))
+
+        output$Inventory_space<-renderUI(paste0('Inventory Space: ',vals$stats[7,'Total_storage_used'],'/',Inventory_limit))
+        sold<-c(vals$dishes[vals$dishes$Week==week,"Set_A_Sold"],vals$dishes[vals$dishes$Week==week,"Set_B_Sold"])
+        dish<-c('Mixed Vegetable Rice Set A','Mixed Vegetable Rice Set B')
+        best<-dish[which.max(sold)]
+        output$BestSold<-renderUI(paste('The most popular dish in last week is ',best,'.'))
+       ingredients<-c('Rice','Pork','Noodles','Rice','Vegetables')
+       for (ingre in ingredients){
+         if (vals$stats[7,ingre]==0){
+            output$safetystock<-renderUI('You have run out some kinds of your ingredients. Please consider safety stock!')
+         }
+       }
+        
+        
         
         vals$round <- vals$round+1
         View(vals$stats)
