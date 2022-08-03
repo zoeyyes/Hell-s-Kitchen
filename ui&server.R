@@ -545,7 +545,7 @@ server <- function(input, output, session) {
            output$BestSold<-renderUI(paste('The most popular dish in last week is ',best,'.'))
 
            ingredients<-c('Rice','Pork','Noodles','Rice','Vegetables')
-           print('warning here 5')
+           
            
            for (ingre in ingredients){
               if (vals$stats[7*vals$round-7,ingre]==0){
@@ -553,13 +553,20 @@ server <- function(input, output, session) {
                 }
             }
           
-          print('warning here 5')
+          print('test')
+          print(vals$round)
+          
+          if(vals$round<5){
+            vals$round=vals$round+1
+          }
           
           if (vals$round==5){
             vals$score<-vals$stats[vals$stats$Day==35,'Cash_on_hand']
           }
            
-           vals$round <- vals$round+1
+          
+          
+          
         }else{
           showModal(warningModel())
           View(vals$stats)
