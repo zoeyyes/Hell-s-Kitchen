@@ -251,6 +251,9 @@ server <- function(input, output, session) {
   output$chickennow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==7*vals$round-7,"Chicken"]}))
   output$noodlesnow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==7*vals$round-7,"Noodles"]}))
   
+  
+  
+  
   output$round_info<-renderUI('This is round 1. Initially, you have $10000 to operate your restaurant.')
   output$Inventory_space<-renderUI('Click on START GAME to start this round. ')
   
@@ -550,23 +553,41 @@ server <- function(input, output, session) {
            for (ingre in ingredients){
               if (vals$stats[7*vals$round-7,ingre]==0){
                  output$safetystock<-renderUI('You have run out some kinds of your ingredients. Please consider safety stock!')
+              }else{
+                output$safetystock<-renderUI(' ')
                 }
+                 
             }
           
-          print('test')
-          print(vals$round)
           
-          if(vals$round<5){
-            vals$round=vals$round+1
-          }
+          
           
           if (vals$round==5){
+            output$porknow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==35,"Pork"]}))
+            output$ricenow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==35,"Rice"]}))
+            output$vegetablesnow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==35,"Vegetables"]}))
+            output$chickennow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==35,"Chicken"]}))
+            output$noodlesnow <- renderUI(paste('current inventory:',{vals$stats[vals$stats$Day==35,"Noodles"]}))
+            output$round_info<-renderUI(paste0('This is round 5/5. Click on START GAME to start this round.'))
+            
+            output$Inventory_space<-renderUI(paste0('Inventory Space: ',vals$stats[35,'Total_storage_used'],'/',Inventory_limit))
+            
+            sold<-c(vals$dishes[vals$dishes$Week==5,"Set_A_Sold"],vals$dishes[vals$dishes$Week==5,"Set_B_Sold"],vals$rest[vals$rest$Week==5,"JSet_A_Sold"],vals$rest[vals$rest$Week==5,"JSet_B_Sold"],vals$rest[vals$rest$Week==5,"UltiSet_Sold"])
+            
+            dish<-c('Mixed Vegetable Rice Set A','Mixed Vegetable Rice Set B','Japanese Bowl A', 'Japanese Bowl B','Ultimate Bowl')
+            
+            best<-dish[which.max(sold)]
+            output$BestSold<-renderUI(paste('The most popular dish in last week is ',best,'.'))
+            
+            ingredients<-c('Rice','Pork','Noodles','Rice','Vegetables')
+            
             vals$score<-vals$stats[vals$stats$Day==35,'Cash_on_hand']
           }
            
-          
-          
-          
+           if(vals$round<5){
+             vals$round=vals$round+1
+           }
+           
         }else{
           showModal(warningModel())
           View(vals$stats)
