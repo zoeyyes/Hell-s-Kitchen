@@ -109,39 +109,32 @@ ui <- dashboardPage(
       tabItem(tabName = "game",
               fluidRow(
                 column(3,tags$div(id="inputsection"),
-                       
                        numericInput("pork","PORK",0),
                        htmlOutput("porknow"),
                        tags$br(),
-                       
                        numericInput("chicken","CHICKEN",0),
                        htmlOutput("chickennow"),
                        tags$br(),
-                       
                        numericInput("rice","RICE",0),
                        htmlOutput("ricenow"),
                        tags$br(),
-                       
                        numericInput("noodles","NOODLES",0),
                        htmlOutput("noodlesnow"),
                        tags$br(),
-                       
                        numericInput("vegetables","VEGETABLESset",0),
                        htmlOutput("vegetablesnow")),
-              
                 column(9,
                        box(height='450px',width='1050px',status = 'primary',
                            img(src='Meat.gif',height='420px',width='1030px')),
-                        img(src='Meat.gif',height='420px',width='1030px')),
-              
-                      div(style = "color:brown, font-size=500%",align='center', 'INVENTORY LIMIT: 3000   Initial Cash-on-hand: $10000'),
-                      div(align='center',uiOutput('startbutton'))
+                       
+                       div(style = "color:brown, font-size=500%",align='center', 
+                           'INVENTORY LIMIT: 3000   Initial Cash-on-hand: $10000'),
+                       div(align='center',uiOutput('startbutton'))
                 )
               ),
               uiOutput("moreControls"),
               tags$br(),
               fluidRow(
-                
                 box(
                   title = 'Message Box',solidHeader = TRUE,width =3,height = '320px',
                   htmlOutput('round_info'),
@@ -151,6 +144,7 @@ ui <- dashboardPage(
                   htmlOutput('BestSold'),
                   tags$br(),
                   htmlOutput('safetystock')
+                  
                 ),
                 box(title = 'Recipes',solidHeader = TRUE,width = 5,status = 'primary',height = '320px',
                     img(src='SetA.png',height='100px',width='180px'),
