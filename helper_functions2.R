@@ -326,7 +326,7 @@ form_orderplan_df<-function(df,chicken,pork,noodle,rice,vegetable){
 calculate_orderingcost<-function(round,orderplan,stats){
   #seq: chicken pork noodle rice vegetable
   # unit_price<-c(5,5,2,2,4) # Would recommend reducing the unit price of the ingredients because now the price of dish exceeds the price of the ingredients
-  unit_price<-c(2,2,1,1,3) # Testing these amounts
+  unit_price<-c(2,2,1,1,1.5) # Testing these amounts
   ordercost<-sum(unit_price*orderplan[round,])
   stats[stats$Day==round*7-6,"Ordering_cost"]<-ordercost
   stats
@@ -577,11 +577,11 @@ calculate_consumption <- function(round_number, stats_df, demand_df) {
 calculate_revenue <- function (round_number, stats_df) {
   
   # Set the price of each dish
-  caifan_A_price <- 5
-  caifan_B_price <- 6.5
-  jap_bowl_A_price <- 10
+  caifan_A_price <- 7
+  caifan_B_price <- 8
+  jap_bowl_A_price <- 8
   jap_bowl_B_price <- 12
-  ultimate_bowl_price <- 15
+  ultimate_bowl_price <- 20
   
   for (day in (7*round_number-6):(7*round_number)){
     stats_df[stats_df$Day == day, "Revenue"] <- (stats_df[stats_df$Day == day, "Mixed_Vegetable_Rice_Set_A_Sold"] * caifan_A_price +
