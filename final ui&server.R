@@ -693,10 +693,7 @@ server <- function(input, output, session) {
           dish<-c('Mixed Vegetable Rice Set A','Mixed Vegetable Rice Set B')
           best<-dish[which.max(sold)]
           output$BestSold<-renderUI(paste('The most popular dish in last week is ',best,'.'))
-        }else{
-          showModal(warningModel())
-          View(vals$stats)
-        }
+        
         
        ingredients<-c('Rice','Pork','Noodles','Chicken','Vegetables')
        output$safetystock<-renderUI(' ')
@@ -709,9 +706,12 @@ server <- function(input, output, session) {
        }
         
         
-        
         vals$round <- vals$round+1
         View(vals$stats)
+        }else{
+          showModal(warningModel())
+          View(vals$stats)
+        }
         
       }}
     output$analysis <- renderTable(head(vals$weekly_plan))
