@@ -31,12 +31,13 @@ passwordModal <- function(failed = FALSE,duplicated=FALSE,password_wrong=FALSE) 
 warningModel <- function(){
   modalDialog(
     title='WARNING',
-    "Your order cost is more than your cash-on-hand,please renter your inventory",
+    "The cost is more than your cash-on-hand, please re-enter your ordering plan.",
     footer = tagList(
       modalButton('OK')
     )
   )
 }
+
 reEnterPasswordModal<-function(failed=FALSE,playername){
   modalDialog(
     title = paste('Re-enter your current password,',playername),
@@ -109,6 +110,25 @@ getAWSConnection <- function(){
     password = getOption("AWSPassword"))
   conn
 }
+
+getpassword<-function(playerid){
+  conn <- getAWSConnection()
+  querytemplate <- "SELECT * FROM Player WHERE id=?id1 ;"
+  query<- sqlInterpolate(conn, querytemplate,id1=playerid)
+  print(query)
+  result <- dbGetQuery(conn,query)
+  print(result)
+  if (nrow(result)==1){
+    password <- result$password[1]
+  } else {
+    print(result) #for debugging
+    playerid <- 0
+  }
+  dbDisconnect(conn)
+  password
+}
+
+getpassword(1)
 
 getPlayerID <- function(playername,password){
   
