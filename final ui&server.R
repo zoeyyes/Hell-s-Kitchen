@@ -624,7 +624,7 @@ server <- function(input, output, session) {
         
         vals$stats <- calculate_orderingcost(vals$round,vals$orderplan,vals$stats)
         print('ordering cost')
-        if(vals$stats[vals$stats$Day==1,"Ordering_cost"] <= vals$stats[vals$stats$Day == 1,'Cash_on_hand']){
+        
         #error occurs
         vals$stats<-update_storage_used(vals$round,vals$orderplan,vals$stats)
         print('update inventory')
@@ -704,9 +704,7 @@ server <- function(input, output, session) {
         
         vals$round <- vals$round+1
         View(vals$stats)
-        }else{
-          showModal(warningModel())
-        }
+        
       }}
     output$analysis <- renderTable(head(vals$weekly_plan))
     output$dishes <- renderTable(head(vals$dishes))
