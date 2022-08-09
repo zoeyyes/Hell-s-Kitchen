@@ -717,11 +717,11 @@ server <- function(input, output, session) {
     output$analysis <- renderTable(head(vals$weekly_plan))
     output$dishes <- renderTable(head(vals$dishes))
     output$rest <- renderTable(head(vals$rest))
-    updateNumericInput(session,'pork',value = 0)
-    updateNumericInput(session,'chicken',value = 0)
-    updateNumericInput(session,'noodles',value = 0)
-    updateNumericInput(session,'rice',value = 0)
-    updateNumericInput(session,'vegetables',value = 0)
+    updateNumericInput(session,'pork',value = NA)
+    updateNumericInput(session,'chicken',value = NA)
+    updateNumericInput(session,'noodles',value = NA)
+    updateNumericInput(session,'rice',value = NA)
+    updateNumericInput(session,'vegetables',value = NA)
   })
   
   #-----------------------------------leaderboard( tbd )---------------------------------------------  
