@@ -302,7 +302,9 @@ server <- function(input, output, session) {
       vals$playerid <- playerid
       vals$playername <- input$playername
       vals$password<-input$password3
+      vals$round<-1
       removeModal()
+      
     } else {
       showModal(loginModal(failed = TRUE))
     }
